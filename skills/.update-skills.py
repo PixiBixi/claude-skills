@@ -31,7 +31,7 @@ def commit_skill(name: str, skill_file: str) -> bool:
     try:
         subprocess.run(["git", "-C", SKILLS_DIR, "add", "--", skill_file], check=True)
         subprocess.run(
-            ["git", "-C", SKILLS_DIR, "commit", "-m", f"chore(claude): sync {name} skill from upstream", "--", skill_file],
+            ["git", "-C", SKILLS_DIR, "commit", "-m", f"chore({name}): sync from upstream", "--", skill_file],
             check=True,
         )
         print(f"  [{name}] committed")
