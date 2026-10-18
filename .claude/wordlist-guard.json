@@ -1,0 +1,18 @@
+{
+    "bannedChars": ["U+2014", "U+2013", "U+2022"],
+    "bannedWords": [
+        "re:\\b(white|black)list(s|ed|ing)?\\b",
+        "re:\\bslave(s|d)?\\b",
+        "re:\\bdummy\\b"
+    ],
+    "allowPaths": [
+        "skills/confluence/",
+        "skills/jira-cli/",
+        "/.venv/",
+        "/node_modules/",
+        "/__pycache__/",
+        "/.git/",
+        "*.min.js",
+        "*.lock"
+    ]
+}
