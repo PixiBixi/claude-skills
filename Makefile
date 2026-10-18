@@ -3,7 +3,7 @@ SCRIPT   := $(ROOT_DIR)skills/.update-skills.py
 
 .DEFAULT_GOAL := help
 
-.PHONY: help update-skills check validate
+.PHONY: help update-skills check validate check-anchors
 
 help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -16,3 +16,6 @@ check: ## Show skills diffs without modifying files (dry-run)
 
 validate: ## Validate the plugin and marketplace manifests
 	@claude plugin validate $(ROOT_DIR)
+
+check-anchors: ## Check the wiki URLs and anchors cited by the wiki plugin skills against the live site
+	@python3 $(ROOT_DIR)plugins/wiki/check-anchors.py

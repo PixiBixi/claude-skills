@@ -14,7 +14,7 @@ skills/<name>/
 
 Every directory under `skills/` is deployed, no registration needed. Add a row to the README skills table when adding a skill.
 
-A skill distilled from a wiki.jdelgado.fr article goes under `plugins/wiki/skills/<name>/` instead, so readers install it without the personal skills. The article links to it through its `skill:` front matter key.
+A skill distilled from a wiki.jdelgado.fr article goes under `plugins/wiki/skills/<name>/` instead, so readers install it without the personal skills. The article links to it through its `skill:` front matter key. Cite wiki sections as full URLs with their anchor, or as a letter declared `- T = <url>` then `T #anchor`: `make check-anchors` only verifies those forms.
 
 ## Upstream mirrors
 

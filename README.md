@@ -59,6 +59,7 @@ Use one or the other, not both: each skill would load twice.
 | Command | Does |
 |---------|------|
 | `make validate` | `claude plugin validate` on the manifests |
+| `make check-anchors` | Check that the wiki URLs and anchors cited by the `wiki` plugin skills exist on the live site (also run weekly by CI) |
 | `make check` | Dry-run diff of upstream-mirrored skills |
 | `make update-skills` | Sync upstream-mirrored skills, one commit per skill |
 | `pre-commit install --hook-type pre-commit --hook-type commit-msg` | Enable the hooks after cloning |
