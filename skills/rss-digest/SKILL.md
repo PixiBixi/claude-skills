@@ -10,7 +10,7 @@ The site is a SPA: WebFetch on the homepage returns nothing useful. Go through t
 ## Fetch
 
 ```bash
-SKILL_DIR=~/.claude/skills/rss-digest/scripts
+SKILL_DIR="${CLAUDE_SKILL_DIR}/scripts"
 OUT="<session scratchpad>/rss"
 "$SKILL_DIR/fetch.sh" "$OUT" 30     # days, default 30
 ```
