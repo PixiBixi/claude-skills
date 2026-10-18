@@ -1,0 +1,13 @@
+{
+    "name": "pixibixi",
+    "owner": {
+        "name": "PixiBixi"
+    },
+    "plugins": [
+        {
+            "name": "pixibixi",
+            "source": ".",
+            "description": "Personal Claude Code skills: SRE and platform workflows (GitLab, Jira, Grafana, Terraform, incidents) and a few personal ones."
+        }
+    ]
+}

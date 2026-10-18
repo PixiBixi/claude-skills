@@ -1,0 +1,9 @@
+{
+    "name": "pixibixi",
+    "description": "Personal Claude Code skills: SRE and platform workflows (GitLab, Jira, Grafana, Terraform, incidents) and a few personal ones.",
+    "author": {
+        "name": "PixiBixi"
+    },
+    "repository": "https://github.com/PixiBixi/claude-skills",
+    "license": "Apache-2.0"
+}
