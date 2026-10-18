@@ -8,6 +8,11 @@
             "name": "pixibixi",
             "source": ".",
             "description": "Personal Claude Code skills: SRE and platform workflows (GitLab, Jira, Grafana, Terraform, incidents) and a few personal ones."
+        },
+        {
+            "name": "wiki",
+            "source": "./plugins/wiki",
+            "description": "Skills distilled from the articles of wiki.jdelgado.fr: review Thanos deployments against field rules from production."
         }
     ]
 }

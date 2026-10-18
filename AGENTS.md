@@ -14,6 +14,8 @@ skills/<name>/
 
 Every directory under `skills/` is deployed, no registration needed. Add a row to the README skills table when adding a skill.
 
+A skill distilled from a wiki.jdelgado.fr article goes under `plugins/wiki/skills/<name>/` instead, so readers install it without the personal skills. The article links to it through its `skill:` front matter key.
+
 ## Upstream mirrors
 
 A SKILL.md with a `source:` frontmatter field mirrors an upstream file (`confluence`, `jira-cli`). `make update-skills` overwrites its body and re-injects `source:`, one commit per skill. Never add local rules to a mirror: they would be wiped on the next sync. Put them in a separate layer skill instead, as `ticket-conventions` does on top of `jira-cli`. Mirrors are exempt from the writing rules below.

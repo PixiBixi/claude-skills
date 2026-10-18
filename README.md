@@ -1,6 +1,11 @@
 # claude-skills
 
-Personal [Claude Code](https://code.claude.com) skills, mostly SRE and platform engineering workflows. The repo is both a plugin marketplace and a single plugin named `pixibixi`.
+Personal [Claude Code](https://code.claude.com) skills, mostly SRE and platform engineering workflows. The repo is a plugin marketplace with two plugins:
+
+| Plugin | Holds |
+|--------|-------|
+| `pixibixi` | The repo root: every skill under `skills/` |
+| `wiki` | `plugins/wiki/`: skills distilled from [wiki.jdelgado.fr](https://wiki.jdelgado.fr/) articles, linked from those articles |
 
 ## Install
 
@@ -9,13 +14,17 @@ As a plugin (skills are namespaced, e.g. `/pixibixi:mr-open`):
 ```bash
 claude plugin marketplace add PixiBixi/claude-skills
 claude plugin install pixibixi@pixibixi
+# or only the wiki skills
+claude plugin install wiki@pixibixi
 ```
+
+In one step from a session: `/plugin install wiki --marketplace PixiBixi/claude-skills`.
 
 As user-level skills with their short names, from a clone (what the [dotfiles](https://github.com/PixiBixi/dotfiles) `init_mac.sh` does):
 
 ```bash
 git clone https://github.com/PixiBixi/claude-skills.git ~/Documents/perso/git/claude-skills
-for skill_dir in ~/Documents/perso/git/claude-skills/skills/*/; do
+for skill_dir in ~/Documents/perso/git/claude-skills/skills/*/ ~/Documents/perso/git/claude-skills/plugins/*/skills/*/; do
     ln -sfn "$skill_dir" ~/.claude/skills/"$(basename "$skill_dir")"
 done
 ```
@@ -38,6 +47,7 @@ Use one or the other, not both: each skill would load twice.
 | `k8s-rightsizing` | Size Kubernetes requests and limits from real usage |
 | `mr-open` | Signed per-scope commits, then open or update an MR / PR |
 | `pixibixi-wiki-article` | Write an article for wiki.jdelgado.fr |
+| `reviewing-thanos-deployments` (`wiki`) | Review a Thanos deployment against the wiki's production rules |
 | `rss-digest` | Catch up on a FreshRSS backlog as a digest |
 | `scoping-a-website` | Scope a website before design or code |
 | `tf-module-release` | Tag a Terraform module and bump its callers |

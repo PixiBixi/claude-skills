@@ -57,7 +57,7 @@ repos:
     hooks:
       - id: markdownlint
         args: [--fix, --config, .markdownlint.json]
-        exclude: '^skills/'
+        exclude: '^(skills|plugins/[^/]+/skills)/'
 
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v3.6.0

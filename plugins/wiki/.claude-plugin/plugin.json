@@ -1,0 +1,12 @@
+{
+    "name": "wiki",
+    "version": "0.1.0",
+    "description": "Skills distilled from the articles of wiki.jdelgado.fr: review Thanos deployments against field rules from production.",
+    "author": {
+        "name": "PixiBixi",
+        "url": "https://wiki.jdelgado.fr/about/"
+    },
+    "homepage": "https://wiki.jdelgado.fr/",
+    "repository": "https://github.com/PixiBixi/claude-skills",
+    "license": "Apache-2.0"
+}
