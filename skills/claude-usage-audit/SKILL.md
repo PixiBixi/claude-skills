@@ -10,7 +10,7 @@ Four local scripts over `~/.claude/projects/**/*.jsonl` (main sessions and `suba
 ## Run
 
 ```bash
-SKILL_DIR=~/.claude/skills/claude-usage-audit/scripts
+SKILL_DIR="${CLAUDE_SKILL_DIR}/scripts"
 OUT=$(mktemp -d)          # or the session scratchpad
 python3 -I "$SKILL_DIR/usage.py" "$OUT/usage.json"            # totals, daily, models, projects, sessions, cache rebuilds, tools, skills, agents
 python3 -I "$SKILL_DIR/context_sources.py" "$OUT/usage2.json" # Bash command families by output size, full vs partial Read, sdk entrypoints, idle gaps
