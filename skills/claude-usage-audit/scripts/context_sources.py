@@ -67,7 +67,7 @@ for f in files:
                     p = inp.get("file_path", "")
                     partial = bool(inp.get("offset") or inp.get("limit"))
                     read_ids[c["id"]] = partial
-                    sess_reads[d.get("sessionId")][p] += 1
+                    sess_reads[f][p] += 1  # per transcript: a subagent shares the sessionId but not the context
             if not is_sub and d.get("entrypoint") == "cli":
                 if last_t is not None and m.get("usage"):
                     g = (t - last_t).total_seconds() / 60
