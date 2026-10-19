@@ -4,7 +4,7 @@ Rounds 1 to 3 of the interview are already answered: skip them.
 
 ## Round 0, measured
 
-Payload sizes (compressed), DOM node count, eager rendering (offscreen sections, autoplaying loops), external dependencies (fonts, CDNs, trackers), cache headers (hashed assets `immutable`, HTML short-lived). Run `scripts/sitemap-inventory.py` on the live site so the plan covers every template, not just the home page.
+Payload sizes (compressed), DOM node count, eager rendering (offscreen sections, autoplaying loops), external dependencies (fonts, CDNs, trackers), cache headers (hashed assets `immutable`, HTML short-lived). Read minification and fingerprinting from the built HTML and files, not from the config: an MkDocs site had `minify_css: true` and shipped every own stylesheet unminified, because `css_files` was empty. Run `scripts/sitemap-inventory.py` on the live site so the plan covers every template, not just the home page.
 
 Field data first: real-user p75 from CrUX tells whether visitors suffer before any lab run says why. The keyless quota is shared and answers 429, so pass `key=` (a Google Cloud API key) or read pagespeed.web.dev; a low-traffic site has no CrUX record, say so and rely on the lab.
 
@@ -37,3 +37,10 @@ States the measured costs, the plan in order, the commit scopes, and a before/af
 - Render delay dominating the LCP while Script Evaluation stays small means CSS and layout, not JS: merge or inline critical render-blocking stylesheets, and put `content-visibility: auto` on offscreen sections of long pages (high Style & Layout, high Speed Index).
 - On an ad-funded site, measure twice: as is, then with the ad and consent stack blocked (`--blocked-url-patterns='*doubleclick*' ...`, domains from `third-parties-insight`). The gap is what the owner cannot fix in code. Lighthouse sees the pre-consent page, so a visitor who accepts loads more.
 - Any large fetch started at boot, even in `requestIdleCallback`, counts in Lighthouse's simulated mobile LCP. Start non-critical payloads on first interaction.
+- A bimodal simulated LCP (2.6 s on some runs, 4.9 s on others), or one far above `observedLargestContentfulPaint` in the `metrics` audit, is the simulation, not the page: one wiki observed 0.17 to 0.42 s on every run. Rerun 3 times with `--throttling-method=devtools` (real throttling) before hunting a cause in the code. Validate CLS there too: a late font swap gave 0.107 under devtools and 0.018 simulated.
+
+## Fonts
+
+- A late swap shifting text: preload the latin subset first, then measure with devtools throttling. If it still shifts, `font-display: optional` or a metric-adjusted fallback (`size-adjust`), and say what each costs.
+- A lighter font that drops an axis or a weight is a design change: validate it with the screenshots before recommending it. Dropping `opsz` from Source Serif 4 cut 122 KB to 51 KB, but widened every heading and reflowed the mobile h1 from 3 to 4 lines.
+- Google Fonts serves the full variable file whenever the request names `opsz`, whatever range or fixed value is asked: no lighter optical-size variant comes from there, only a self-hosted instance (fontTools `instancer`).
