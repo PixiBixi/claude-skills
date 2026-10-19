@@ -78,5 +78,9 @@
     {
         "query": "pourquoi Lighthouse me dit que mon image hero n'a pas de width/height ? juste ce warning",
         "should_trigger": false
+    },
+    {
+        "query": "compare les perfs de clubic.com, lemonde.fr et amazon.fr sur mobile, juste pour voir qui s'en sort le mieux",
+        "should_trigger": false
     }
 ]
