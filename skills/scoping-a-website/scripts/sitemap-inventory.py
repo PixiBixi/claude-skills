@@ -8,8 +8,10 @@ Usage: sitemap-inventory.py https://example.org
 """
 import re
 import sys
+import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
+import zlib
 from collections import defaultdict
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlparse
@@ -26,14 +28,26 @@ def same_site(url, base):
     return u.scheme in ("http", "https") and u.netloc == b.netloc
 
 
+BLOCKED = []  # (url, status) answered 401/403/429: bot protection, not a missing sitemap
+
+
 def fetch(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
-            return resp.read(MAX_BYTES).decode("utf-8", errors="replace")
+            body = resp.read(MAX_BYTES)
+    except urllib.error.HTTPError as exc:
+        if exc.code in (401, 403, 429):
+            BLOCKED.append((url, exc.code))
+        print(f"# skip {url}: {exc}", file=sys.stderr)
+        return None
     except Exception as exc:  # network errors only change the fallback path
         print(f"# skip {url}: {exc}", file=sys.stderr)
         return None
+    if body[:2] == b"\x1f\x8b":
+        # sitemap.xml.gz: bounded inflate, the remote file could be a gzip bomb.
+        body = zlib.decompressobj(16 + zlib.MAX_WBITS).decompress(body, MAX_BYTES)
+    return body.decode("utf-8", errors="replace")
 
 
 def sitemap_urls(base):
@@ -110,10 +124,17 @@ def main():
     for url in dict.fromkeys(pages):
         groups[template_of(url)].append(url)
 
+    if BLOCKED:
+        codes = ", ".join(f"{code} {url}" for url, code in BLOCKED)
+        print(f"# BLOCKED (bot protection, inventory incomplete): {codes}")
     print(f"# {len(pages)} URLs from {source}")
-    print("template\tcount\tsample")
+    print("template\tcount\tsamples")
     for tpl, urls in sorted(groups.items(), key=lambda kv: -len(kv[1])):
-        print(f"{tpl}\t{len(urls)}\t{urls[0]}")
+        # First, middle and last: a URL group often mixes hub and detail templates.
+        samples = list(dict.fromkeys([urls[0], urls[len(urls) // 2], urls[-1]]))
+        print(f"{tpl}\t{len(urls)}\t{' '.join(samples)}")
+    if BLOCKED and not pages:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
