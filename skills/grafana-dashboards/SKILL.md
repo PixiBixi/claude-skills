@@ -35,6 +35,8 @@ gcx config check || { echo "not ready: gcx login"; exit 1; }
 ```
 Call gcx and kubectl directly, never through a shell function, a variable or an `env` prefix (zsh breaks the first two, and permission rules and the auto mode classifier cannot match any of them).
 
+A PromQL range is `gcx metrics query -d <uid> '<expr>' --from <t> --to <t> --step 5m -o json`. A Tempo search spans 48h at most (`exceeds 48h0m0s`): walk a week day by day with `--from`/`--to`.
+
 ## Which instance
 | Request | Pass |
 |---|---|
