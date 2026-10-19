@@ -6,11 +6,18 @@ Rounds 1 to 3 of the interview are already answered: skip them.
 
 Payload sizes (compressed), DOM node count, eager rendering (offscreen sections, autoplaying loops), external dependencies (fonts, CDNs, trackers), cache headers (hashed assets `immutable`, HTML short-lived). Run `scripts/sitemap-inventory.py` on the live site so the plan covers every template, not just the home page.
 
+Field data first: real-user p75 from CrUX tells whether visitors suffer before any lab run says why. The keyless quota is shared and answers 429, so pass `key=` (a Google Cloud API key) or read pagespeed.web.dev; a low-traffic site has no CrUX record, say so and rely on the lab.
+
+```bash
+curl -sS "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=$URL&strategy=mobile&category=performance&key=$PSI_KEY" > psi.json
+jq -r '.loadingExperience | .overall_category, (.metrics | to_entries[] | "\(.key) p75=\(.value.percentile)")' psi.json
+```
+
 ## One question call
 
 With the multiple-choice question tool, in the user's language:
 - Target: rendering and smoothness, network weight, mobile, accessibility and SEO.
-- Performance budget: LCP and TBT figures, recommended default first.
+- Performance budget, recommended default first: the Core Web Vitals "good" thresholds at p75 on mobile (LCP 2.5 s, INP 200 ms, CLS 0.1), with TBT 200 ms in the lab as the INP proxy.
 - Build-step tolerance: none, a minifier, a full SSG.
 
 ## The brief
