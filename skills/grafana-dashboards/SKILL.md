@@ -14,7 +14,7 @@ Three tools ship in `scripts/`: `lint_dashboard.py` (schema baseline before savi
 2. § Query pre-flight on every metric you plan to read, on the target datasource.
 3. Platform folder: read `references/folder-layout.md`. Apply § Dashboard-level defaults and § Language.
 4. Write the panels with `references/panels.md` (tables, fleets, empty-state, template variables) and `references/promql.md` (global Thanos, aggregation and absence traps).
-5. § Before you save: run the linter, then push with § Every save carries a version note.
+5. § Before you save: run the linter, then push with § Every save carries a version note (a new dashboard: § Creating a dashboard with gcx).
 
 A panel that is empty, slow, OOMs the query layer or shows a plausible but wrong number: start from the symptom table in `references/troubleshooting.md`.
 
@@ -33,7 +33,7 @@ Every Grafana call in this skill's tools goes through `gcx`. Check it once per s
 command -v gcx >/dev/null || { echo "install: brew install gcx"; exit 1; }
 gcx config check || { echo "not ready: gcx login"; exit 1; }
 ```
-If it reports `Auth method: token (environment override)`, rerun with `env -u GRAFANA_TOKEN -u GRAFANA_SERVICE_ACCOUNT_TOKEN -u GRAFANA_URL` before the command: those variables override every context and answer 401 however fresh the OAuth login is. Call gcx and kubectl directly, never through a shell function or a variable (zsh breaks it, and permission rules cannot match it). The tools strip those variables on their own.
+Call gcx and kubectl directly, never through a shell function, a variable or an `env` prefix (zsh breaks the first two, and permission rules and the auto mode classifier cannot match any of them).
 
 ## Which instance
 | Request | Pass |
@@ -111,6 +111,19 @@ gcx dashboards update <uid> -f push.json
 ```
 
 A `409 Conflict` means the manifest's `resourceVersion` predates another save: re-`get` right before each push and patch that copy, never rebuild from an older fetch.
+
+## Creating a dashboard with gcx
+Wrap the v1 model in a manifest and pass the API version: the server defaults to v2 and rejects a v1 body with `does not match the expected API version`. Use the same `--api-version` on the later `get` and `update`.
+
+```bash
+jq --arg u "<uid>" '{apiVersion: "dashboard.grafana.app/v1beta1", kind: "Dashboard",
+  metadata: {name: $u, annotations: {"grafana.app/folder": "<folder uid>", "grafana.app/grant-permissions": "default"}},
+  spec: (del(.id) | .uid = $u)}' dash.json > create.json
+gcx dashboards create --api-version dashboard.grafana.app/v1beta1 -f create.json
+```
+
+- `grafana.app/grant-permissions: default` is mandatory: without it the dashboard gets no permissions and answers 403, even to an Editor service account.
+- `create` ignores `grafana.app/message`: version 1 always reads "Initial save". The ticket note starts with the first `update`.
 
 ## Google Cloud Monitoring datasources
 A panel on the `cloud-monitoring` datasource (plugin type `stackdriver`), in PromQL or MQL mode, is covered by the **`grafana-cloud-monitoring`** skill: metric name conversion, the `migrateQuery` rewrite that empties a JSON-authored panel, `monitored_resource`, MQL tables, and the pre-flight query validation via `gcx datasources cloudmonitoring query`.
