@@ -40,6 +40,9 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 - **Frontmatter** obligatoire : `description:` (une phrase riche en mots-clés) + `tags:` (liste).
 - **Admonitions** : `!!! note`, `!!! warning`, `!!! tip "Titre"` (contenu indenté de 4 espaces).
 - **Blocs de code titrés** : ` ```yaml title=".github/workflows/ci.yml" `.
+- **Commande et sortie dans un seul bloc `console`**, la commande préfixée de `$ `. Un bloc `bash` suivi d'un bloc `text` pour la sortie se lit comme 2 extraits sans rapport.
+- **Une liste dont chaque item porte un oui/non et sa raison devient un tableau** (`Opération | Couverte | Pourquoi`), comme 2 listes « ce qui passe » et « ce qui ne passe pas ».
+- **Les outils de l'auteur** : quand l'article montre une commande manuelle qu'un de ses projets couvre déjà (klens pour l'inspection read-only d'un cluster, par exemple), proposer de la remplacer par l'outil, lien vers le repo compris.
 - **Liens internes** : chemins relatifs vers le `.md` (`goreleaser.md`, `github/go-ci.md`) - MkDocs les résout.
 - **Images/SVG** : `![Alt](nom.svg)` avec le fichier dans le même dossier que l'article.
 
