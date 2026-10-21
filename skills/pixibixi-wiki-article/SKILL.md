@@ -55,11 +55,12 @@ Le `CLAUDE.md` du projet porte le style de fond (ton, structure, tournures). Ce 
 - **Guillemets français** `« … »` avec une espace intérieure, pas de `"…"` droits dans la prose. C'est la convention des articles récents.
 - **Pas de virgule devant « et »**, ni devant « ou » et « ni ». C'est une faute, le réflexe vient de l'anglais où le comma before *and* est courant. On écrit « le cache et l'enveloppe mémoire », pas « le cache, et l'enveloppe mémoire ». Ça vaut aussi dans une énumération, où le français met la virgule entre les termes mais pas devant le dernier : « Ansible, Terraform et Makefile ». Attention au retour à la ligne, la faute se cache aussi à cheval sur 2 lignes, virgule en fin de ligne et `et` au début de la suivante, où un grep sur `, et` ne la voit pas.
 
-    La seule exception est la virgule qui **ferme une incise** et se trouve juste avant le
-    « et » : dans « le `main:` du build, qui vaut `""` tant qu'on ne l'a pas écrit, et ko
-    passe cette chaîne vide », la virgule appartient à la relative, pas au « et ». La
-    retirer casse la phrase. Avant un remplacement global, chercher le motif
-    `, <qui|que|dont|où> …, et` et épargner ces cas.
+    Une virgule qui **ferme une incise** juste avant le « et » est grammaticalement
+    correcte (« le `main:` du build, qui vaut `""` tant qu'on ne l'a pas écrit, et ko
+    passe cette chaîne vide »), mais l'auteur la refuse à la lecture comme les autres
+    (« 3 caches, un par type de donnée, et ils… »). On ne la garde pas : on coupe la
+    phrase ou on transforme l'incise en relative sans virgule. Un remplacement global ne
+    la retire pas pour autant à l'aveugle, puisque retirer la seule virgule casse la phrase.
 - **Genre des acronymes et des composants** : il suit le nom-tête de l'expression développée, pas l'anglais. Une TSDB (*Database*), une API (*interface*), une VM (*machine*), une stack (*pile*), une store gateway (*passerelle*), une query (*requête*). Mais **un querier**, qui est le composant et pas la requête, un query frontend dont la tête est *frontend*, un compactor. Accorder aussi les pronoms et adjectifs.
 
     L'accord voyage plus loin que le déterminant collé au mot, et c'est là que la faute
@@ -119,6 +120,8 @@ Un titre dit **ce que la section fait gagner**, pas le mécanisme qu'elle décri
 
 Le nom d'un produit vendeur (`Hyperdisk`, `Ketama`) reste dans le corps, pas dans le titre : il ferme le titre à ceux qui sont sur un autre cloud.
 
+Un titre imagé ou elliptique (`Un block neuf est froid partout`) se refuse comme une phrase elliptique. Le titre dit la conséquence en clair : `Le cache ne survit pas à la compaction`. Quand l'auteur refuse un titre, proposer 3 options sous 3 angles (la limite, le symptôme, l'objet) avec une recommandation, plutôt qu'une seule retouche.
+
 ### Le gras n'est pas un titre
 
 Un `**Label**` posé en tête de bloc pour annoncer ce qui suit est un titre déguisé. Il n'entre pas dans la nav, markdownlint ne le contrôle pas, et personne ne peut lier dessus. Il passe en `###`, et le deux-points de fin part avec lui.
@@ -154,12 +157,18 @@ Ce qui sonne faux, à la place :
 - **la règle avant sa raison** : « Cette liste doit sortir dans le même ordre » puis l'explication. Poser le problème d'abord, la règle ensuite.
 - **un mot de remplacement pour un terme déjà posé** : « branche » ou « feuille » pour une stack, « nuance » pour ce qui décide de tout. Garder le mot de l'article.
 - **un mot approximatif ou inventé pour un objet réel** : « le registre de clusters » pour le générateur `clusters` d'ArgoCD, « l'option qui rend le tout praticable ». Nommer l'objet tel qu'il existe.
-- **un sujet vague** (« Le sujet a sa propre page », « le tout ») : nommer ce dont on parle, « Les caches sont un sujet à part entière ».
+- **un sujet vague** (« Le sujet a sa propre page », « le tout ») : nommer ce dont on parle, « Les caches sont un sujet à part entière ». Même chose pour un « On » plus pronom en tête de phrase (« On ne l'a pas mutualisé partout » devient « Chez nous, le cache n'est pas mutualisé sur toutes les stacks ») et pour un nom flou de remplissage (« ses voisins » pour les autres replicas, « unique globalement », « 2 montages » pour 2 topologies).
+- **le verbe approximatif** : un serveur « implémente » un protocole et un port « sert » un protocole, ils ne le « parlent » pas.
+- **la mini-phrase de conséquence** posée après un point (« pas par 6. Se tromper là sous-dimensionne d'un facteur 3. ») : la rattacher à la phrase qui la porte.
+- **le détail qui ne sert pas la thèse** : une énumération de champs voisins (`metafile_exists_ttl`, `metafile_content_ttl`…) dans la phrase qui pose le piège de `blocks_iter_ttl`. On ne garde que celui qui compte, la phrase raccourcit d'elle-même.
+- **une liste écrite en paragraphes** : des paragraphes qui commencent tous par « Le flag `--x` décide… » sont une liste, ils passent en puces sous une phrase d'intro terminée par « : ».
+- **une option décrite sans dire laquelle on tourne** : après avoir présenté 2 stratégies ou 2 valeurs d'un flag, dire celle qu'on a (lue dans le repo, défaut compris) et pourquoi, en allant chercher la raison dans le code amont si elle n'a jamais été écrite (`recursive` passe par `IterWithAttributes`, que le caching bucket ne cache pas).
 - **un lien sur le titre recopié** : poser le lien sur un groupe de mots court de la phrase, « ont [leur propre page](thanos-cache.md) ». Un renvoi à une section se fait en lien, pas en texte (voir `references/gotchas.md`, Gotcha 5).
 - **le jargon non défini** (« fan-out ») : une infobulle dans `includes/abbreviations.md` plutôt qu'une définition en ligne.
 - **le gras** : le réserver au mot qui porte la thèse (« **il attend** », « **le filtrage à la source** », « **amplificateur** »). Un gras orphelin dont le lecteur ne voit pas l'opposition (« que cette stack **annonce** ») s'écrit en clair.
 - **l'absolu et le général non vérifiés** : « jamais », « irréductible pour tout le reste », « la moitié de ce qui la sollicite », « pousse la parallélisation plus haut » contredit 20 lignes plus bas. Chaque absolu se vérifie (code amont, config du repo) ou se nuance (« en principe », « certains déploiements »). Une recommandation ne se réécrit pas en « on a fait » sans preuve.
-- **un comportement qui dépend de la version, sans date** : « avec RF=2 une éviction est survivable » n'est vrai que depuis Thanos v0.37. Dater le comportement, citer la PR, et passer en `!!! warning` si l'ancien comportement casse quelque chose.
+- **un comportement qui dépend de la version, sans date** : « avec RF=2 une éviction est survivable » n'est vrai que depuis Thanos v0.37. Dater le comportement, citer la PR, et passer en `!!! warning` si l'ancien comportement casse quelque chose. Un bug d'un outil tiers décrit au présent se recherche aussi en amont : les compteurs Dragonfly à zéro sont émis depuis la v2.0.0 (PR #8052) alors que la prod tourne en v1.37, donc on écrit « Avant la v2.0.0 » et la version qu'on fait tourner.
+- **un correctif amont cru sur parole** : « corrigé en v0.35.0 » se vérifie dans le code, pas dans le titre de la PR. Le `ObjectStorageConfigHash` de Thanos hashe la config du caching bucket, pas celle du stockage objet, et ne cloisonne donc pas 2 buckets qui partagent un backend.
 - **une limite ou un garde-fou recommandé sans ce qu'il casse** : une requête coupée par `--store.limits.*` n'est jamais servie et le dashboard échoue à chaque rafraîchissement. Chaque recommandation de ce type porte son encart `!!! warning`.
 - **une description de notre infra recopiée de mémoire** : relire le repo actuel avant (l'ApplicationSet Thanos avait été réécrit depuis la rédaction).
 - **une durée ou un chiffre propre à notre flotte présenté comme une loi** (« jusqu'à 30 minutes à redevenir prête ») : écrire la règle générique (« plus les index sont gros, plus la reprise est longue »), puis reprendre les renvois au chiffre ailleurs dans l'article.
