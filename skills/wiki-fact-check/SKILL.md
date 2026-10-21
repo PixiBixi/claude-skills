@@ -68,6 +68,11 @@ So for any claim in families 1, 3 and 4: **go read the source**, not just the do
 
 When docs and code disagree, code wins and the report flags the contradiction.
 
+Two more checks the source makes cheap:
+
+- **Version.** A behaviour can be true for the version deployed and false for the reader's. Find when it changed (`git log -S` on the function, then `git tag --contains`) and flag a claim that does not date itself. Thanos receive RF=2 needed both replicas to ack until v0.37 (PR #7669), then a quorum of 1.
+- **Our own config.** A passage describing the author's setup (layers, flags, ApplicationSet shape) is checked against the current repo, not memory: the Thanos ApplicationSet had been rewritten since the article was drafted.
+
 ## Try to break it, not to confirm it
 
 An agent asked to "verify this article" confirms the article. The posture that finds anything is the opposite: for each claim, actively hunt the counter-example, the missing condition, the version where it stopped being true.

@@ -47,7 +47,7 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 
 Le `CLAUDE.md` du projet porte le style de fond (ton, structure, tournures). Ce qui suit complète sur des points qu'aucun lint n'attrape.
 
-- **Jamais d'em dash (`U+2014`, tiret cadratin)**, nulle part : ni dans la prose, ni dans les titres, ni dans les descriptions de front matter, ni dans les commentaires d'un bloc de code. C'est la signature la plus visible d'un texte généré. À la place, un `-`, une virgule, un deux-points, ou on coupe la phrase en deux. Les incises appariées (mot, tiret cadratin, aparté, tiret cadratin, suite) passent en virgules ou en parenthèses, jamais en deux tirets : ça se lit mal et un `-` en début de ligne est parsé comme un item de liste par markdownlint.
+- **Jamais d'em dash (`U+2014`, tiret cadratin)**, nulle part : ni dans la prose, ni dans les titres, ni dans les descriptions de front matter, ni dans les commentaires d'un bloc de code. C'est la signature la plus visible d'un texte généré. À la place, un `-`, une virgule, ou on coupe la phrase en deux (pas un deux-points, voir « Construire une phrase »). Les incises appariées (mot, tiret cadratin, aparté, tiret cadratin, suite) passent en virgules ou en parenthèses, jamais en deux tirets : ça se lit mal et un `-` en début de ligne est parsé comme un item de liste par markdownlint.
 - **Jamais d'en dash (`U+2013`, tiret demi-cadratin) non plus**, et il arrive surtout dans les plages : versions, nombres, dates. On écrit `HAProxy 2.4 à 3.2`, pas `2.4` et `3.2` reliés par un `U+2013`. Même raison que l'em dash, il ne se tape pas au clavier. Selon la phrase : `à`, `de X à Y`, ou un simple `-`.
 - **Chiffres toujours en chiffres, jamais en lettres** : « 3 shards », « 12 fichiers », « 100 caches », y compris en début de phrase. Seule exception, les approximations restent en lettres (« une vingtaine de clusters », « la centaine de pods ») - les écrire en chiffres inventerait une précision qui n'existe pas.
 - **Un chiffre précis se justifie sur place, sinon il n'y est pas.** Écrire « garde 14 mois de métriques » en intro alors que le 14 vient d'un palier expliqué 100 lignes plus loin laisse le lecteur devant un nombre arbitraire. Soit on explique là, soit on reste générique (« aussi longtemps qu'on le lui demande ») et le chiffre arrive avec sa raison.
@@ -68,7 +68,7 @@ Le `CLAUDE.md` du projet porte le style de fond (ton, structure, tournures). Ce 
     `un stack` n'en voit aucun. Chercher aussi les quantifieurs (`tous`, `certains`,
     `plusieurs`), les participes détachés du nom et les textes alternatifs des schémas,
     que personne ne relit.
-- **Le vocabulaire du domaine, pas son équivalent français.** La règle n'est pas une liste de mots, c'est un critère : si le terme est celui qu'on lit dans les flags, les métriques, la doc amont ou les dashboards, il reste tel quel. Traduire oblige le lecteur à refaire la correspondance dans sa tête au moment où il cherche justement à retrouver un flag. `timerange` et pas « plage de temps » ni « tranche de temps », `replicas` et pas « réplicas », `at scale` et pas « à l'échelle », `évicté` et pas « évincé », pour le spot comme pour un cache, `lazy load` et `lazy download` et pas « lecture paresseuse » ni « téléchargement paresseux », même avec le flag sous les yeux. Les noms K8s et infra restent en anglais, sans accent.
+- **Le vocabulaire du domaine, pas son équivalent français.** La règle n'est pas une liste de mots, c'est un critère : si le terme est celui qu'on lit dans les flags, les métriques, la doc amont ou les dashboards, il reste tel quel. Traduire oblige le lecteur à refaire la correspondance dans sa tête au moment où il cherche justement à retrouver un flag. `timerange` et pas « plage de temps » ni « tranche de temps », `replicas` et pas « réplicas », `at scale` et pas « à l'échelle », `évicté` et pas « évincé », pour le spot comme pour un cache, `rollback` et pas « revenir en arrière », `lazy load` et `lazy download` et pas « lecture paresseuse » ni « téléchargement paresseux », même avec le flag sous les yeux. Les noms K8s et infra restent en anglais, sans accent.
 
     Ça vaut **surtout dans les titres et les textes alternatifs**, qui sont écrits en
     dernier et relus le moins : c'est là que la traduction survit, alors que le corps du
@@ -113,13 +113,8 @@ Un titre dit **ce que la section fait gagner**, pas le mécanisme qu'elle décri
 | ✗ | ✅ | Pourquoi |
 |---|---|---|
 | `Le compactor en CronJob` | `Compacter sans payer le disque 24 h/24` | nomme le mécanisme, pas le gain |
-| `Sharder la store gateway par plage de temps` | `Un shard par tranche de temps` | descriptif et trop long |
 | `L'arithmétique Hyperdisk, ou comment on paye un choix d'instances` | `Payer de la capacité disque pour acheter du débit` | tournure `X, ou comment Y` et vocabulaire vendeur dans le titre |
-| `Un cache chaud partagé plutôt que 100 caches froids` | `Un seul cache chaud pour toute la flotte` | bonne idée, trop bavarde |
-| `Poser des limites avant que ça coûte` | `Mettre des limites en lecture et en ingestion` | `ça coûte` est vague |
-| `Ce qu'on a essayé et retiré` | `Nos tests et nos échecs` | plat |
 | `La query globale` | `L'architecture high-level` | titrait un composant alors que la section décrit l'archi |
-| `Receive, dont la RAM suit la volumétrie` | `Receive : le composant le plus cher` | une relative avec virgule n'est pas un titre |
 | `Contenir la RAM de Receive` | `Receive : le composant le plus cher` | promet une action qu'on ne peut pas faire : la RAM suit la volumétrie, on agit sur ce qui la fait grossir, on ne la plafonne pas |
 
 Le nom d'un produit vendeur (`Hyperdisk`, `Ketama`) reste dans le corps, pas dans le titre : il ferme le titre à ceux qui sont sur un autre cloud.
@@ -152,139 +147,31 @@ Ce qui sonne faux, à la place :
 - **un deux-points suivi d'une énumération de trois** - figure qui annonce au lieu de dire
 - **le verbe imagé** là où le mécanisme suffit : « force à gonfler la RAM » → « va charger énormément de donnée en RAM »
 - **le familier décoratif** (« on s'en fiche », « part en vrille », « à genoux »). Le blunt du `CLAUDE.md` est une réaction sincère, pas un ornement qu'on saupoudre.
+- **le « X : Y » d'annonce** : « Notre compromis : … », « Le piège : son ordre », « Premier malentendu à lever. On… ». Une phrase complète, ou un point. « Le piège d'une liste dynamique, c'est son ordre. »
+- **une phrase qui s'ouvre sur un connecteur ou un reste d'oral** : « Et », « Mais », « Or », « Encore faut-il », « Reste à », « Sauf que », « D'où », « Ça se lit… ». Reformuler avec un sujet (« Il faut ensuite choisir… », « Les métriques existantes le montraient déjà »). Même chose pour un paragraphe qui commence par du code inline : « Le flag `--x` … ».
+- **les chaînes de conséquences** « , ce qui veut dire », « , donc … , donc », « , parce que », « tout seul, parce que ». Couper en 2 phrases. Une phrase longue passe quand ses relatives coulent, pas quand elle empile des conséquences ou 2 incises à virgules.
+- **le raccourci elliptique** qui oblige à relire : « n'accuse pas son dashboard », « les plus lentes étaient triviales ». Dire le mécanisme en clair : « des requêtes simples qui attendaient la stack la plus lente ».
+- **la règle avant sa raison** : « Cette liste doit sortir dans le même ordre » puis l'explication. Poser le problème d'abord, la règle ensuite.
+- **un mot de remplacement pour un terme déjà posé** : « branche » ou « feuille » pour une stack, « nuance » pour ce qui décide de tout. Garder le mot de l'article.
+- **un mot approximatif ou inventé pour un objet réel** : « le registre de clusters » pour le générateur `clusters` d'ArgoCD, « l'option qui rend le tout praticable ». Nommer l'objet tel qu'il existe.
+- **un sujet vague** (« Le sujet a sa propre page », « le tout ») : nommer ce dont on parle, « Les caches sont un sujet à part entière ».
+- **un lien sur le titre recopié** : poser le lien sur un groupe de mots court de la phrase, « ont [leur propre page](thanos-cache.md) ». Un renvoi à une section se fait en lien, pas en texte (voir `references/gotchas.md`, Gotcha 5).
+- **le jargon non défini** (« fan-out ») : une infobulle dans `includes/abbreviations.md` plutôt qu'une définition en ligne.
+- **le gras** : le réserver au mot qui porte la thèse (« **il attend** », « **le filtrage à la source** », « **amplificateur** »). Un gras orphelin dont le lecteur ne voit pas l'opposition (« que cette stack **annonce** ») s'écrit en clair.
+- **l'absolu et le général non vérifiés** : « jamais », « irréductible pour tout le reste », « la moitié de ce qui la sollicite », « pousse la parallélisation plus haut » contredit 20 lignes plus bas. Chaque absolu se vérifie (code amont, config du repo) ou se nuance (« en principe », « certains déploiements »). Une recommandation ne se réécrit pas en « on a fait » sans preuve.
+- **un comportement qui dépend de la version, sans date** : « avec RF=2 une éviction est survivable » n'est vrai que depuis Thanos v0.37. Dater le comportement, citer la PR, et passer en `!!! warning` si l'ancien comportement casse quelque chose.
+- **une limite ou un garde-fou recommandé sans ce qu'il casse** : une requête coupée par `--store.limits.*` n'est jamais servie et le dashboard échoue à chaque rafraîchissement. Chaque recommandation de ce type porte son encart `!!! warning`.
+- **une description de notre infra recopiée de mémoire** : relire le repo actuel avant (l'ApplicationSet Thanos avait été réécrit depuis la rédaction).
+- **une durée ou un chiffre propre à notre flotte présenté comme une loi** (« jusqu'à 30 minutes à redevenir prête ») : écrire la règle générique (« plus les index sont gros, plus la reprise est longue »), puis reprendre les renvois au chiffre ailleurs dans l'article.
 - **le « je »**, et le « tu » ou le « vous » qui vont avec. Le wiki parle en « on », y compris pour un constat vécu : « Je n'ai pas trouvé de cas où… » devient « Aucun cas rencontré où… », « le mien datait de plusieurs majeures » devient « le cache local datait de plusieurs majeures ». On dépersonnalise sans effacer le constat.
 
-## Schémas SVG (style maison)
+## Schémas SVG
 
-Pour un diagramme d'architecture ou de flux, les skills `archify` et `artifact-diagramming` existent, mais le style maison ci-dessous prime pour les SVG du wiki. Dès que le schéma **encode des quantités** (barres, frise proportionnelle, courbe), c'est un graphique et pas un diagramme : invoquer le skill `dataviz` **avant** d'écrire le premier `<rect>` et faire tourner son validateur de palette, via le skill `dataviz` (lancer le script depuis le répertoire de ce skill, en dark puis en light).
+Avant d'écrire ou de retoucher un SVG, lire `references/svg.md` : palette, SVG thème-aware (`data-jd-theme`, tokens `--jd-*`), contrôles obligatoires.
 
-Ce qu'il attrape et qu'on ne voit pas à l'œil : aplats trop saturés en gros blocs, absence de gap de 2px entre fills adjacents, libellés portant la couleur de la série au lieu d'une encre neutre et séparation insuffisante pour les daltonismes.
+## Gotchas build et lint
 
-Un SVG du wiki doit passer le validateur **sur les 2 surfaces** : inliné il suit le thème, mais sa palette de fallback (RSS, sans JS) reste unique et doit tenir sur les 2 fonds. Éviter `fill-opacity` pour la même raison : le résultat dépend du fond, qu'on ne contrôle pas.
-
-SVG écrits à la main, palette GitHub dark, `viewBox` ~640 de large, police Segoe UI. Boîtes = `rect` bordure `#30363d` + barre d'accent 4px colorée à gauche ; pills = `rect rx=12` bordure colorée.
-
-Chaque teinte a **2 pas** : le vif pour les accents fins, l'atténué pour les aplats de données. Un aplat large en couleur vive tombe dans l'anti-pattern « thick saturated blocks », alors que la même couleur sur une barre d'accent de 4px est correcte.
-
-| Rôle | Accent fin (barre 4px, stroke) | Aplat de données (barre, bande) |
-|---|---|---|
-| Succès / gate / spot | `#3fb950` | `#4e8f57` |
-| Release / accent chaud | `#f78166` | `#c9714f` |
-| Sécurité / info | `#58a6ff` | `#5b8fc9` |
-| Neutre | `#8b949e` | `#8b949e` |
-
-| Rôle | Couleur |
-|---|---|
-| Texte dans une boîte remplie | `#e6edf3` |
-| Texte sur le fond de page | `#6e7781` + `font-weight="600"` |
-| Texte secondaire / flèches / bordure | `#8b949e` / `#30363d` |
-| Fond de boîte | `#161b22` |
-| Fond (pour le rendu PNG uniquement) | `#0d1117` |
-
-Marqueur flèche réutilisable :
-
-```xml
-<marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-  <polygon points="0 0, 8 3, 0 6" fill="#8b949e"/>
-</marker>
-```
-
-Toujours contrôler le rendu (`rsvg-convert` → PNG → Read) avant de committer : chevauchements de pills et largeurs de colonnes ne se voient pas dans le XML.
-
-### Lisibilité dans les 2 thèmes
-
-Un SVG en `<img>` ne voit ni les variables CSS de la page ni le toggle clair/sombre. `docs/javascripts/jd-svg.js` inline donc tout SVG dont la racine porte `data-jd-theme`, dans l'article **et** dans la lightbox glightbox (qui recrée sa propre `<img>` depuis le lien à l'ouverture), et suffixe ses ids. Un `@media (prefers-color-scheme)` dans le SVG suivrait l'OS et se désynchroniserait du toggle : ne pas l'utiliser.
-
-Tout nouveau SVG est écrit thème-aware :
-
-- racine `<svg class="jd-svg" data-jd-theme="" ... font-family="<pile Segoe UI>">` : l'attribut `font-family` est le fallback, une `var()` de police est invalide pour rsvg
-- un `<style>` dont **chaque sélecteur est préfixé `.jd-svg `** (inliné, il fuit dans la page) et chaque couleur s'écrit `var(--jd-<token>, #<hex de la palette ci-dessus>)`. Aucun `fill="#..."` ni `stroke="#..."` en attribut, que des classes
-- pas de `--` dans un commentaire XML (parse error), donc jamais de `var(--jd-...)` en commentaire
-- référence : `docs/monitoring/lgtm/_img/thanos-flow.svg`
-
-| Rôle | Token |
-|---|---|
-| Fond de boîte / fond plus profond | `--jd-surface-raised` / `--jd-surface` |
-| Bordure de boîte | `--jd-border-strong` |
-| Texte dans une boîte | `--jd-ink` |
-| Texte secondaire, flèches, texte sur le fond de page | `--jd-muted` |
-| Accent fin (barre 4px, stroke, texte coloré) | `--jd-{ok,warn,note,bad}-ink` |
-| Aplat de données ou bande | `--jd-{ok,warn,note,bad}-border` |
-| Aplat neutre **sous du texte** | `--jd-border-strong` |
-
-Un aplat qui porte du texte ne prend jamais `--jd-muted` ni `--jd-accent` : tous 2 passent en teinte claire en sombre et le texte `--jd-ink` disparaît dessus (cas réels : la bande « pas de min-time » de thanos-sharding, 2 boîtes de ddos_decision_tree).
-
-Les règles de lisibilité de la palette de fallback restent vraies, puisque c'est elle que voient le RSS et un navigateur sans JS :
-
-- **texte dans une boîte** : donner un `fill` à la boîte, jamais `fill="none"`
-- **texte posé sur le fond de page** : `#6e7781` + `font-weight="600"`, ni `#e6edf3` ni `#333`
-- **ne pas** poser un grand `rect` sombre derrière tout le schéma
-
-Contrôles, tous obligatoires :
-
-```bash
-# 1. le fallback ne bouge pas d'un pixel par rapport à la version committée
-git show "HEAD:$F" > orig.svg
-rsvg-convert -b '#fbfbf9' orig.svg -o orig.png && rsvg-convert -b '#fbfbf9' "$F" -o new.png
-cmp orig.png new.png && echo IDENTICAL
-xmllint --noout "$F"
-# 2. aucun hex hors du <style>
-rg -n '#[0-9a-fA-F]{3,6}\b' "$F"
-```
-
-3. Rendu réel sur `mkdocs serve`, en clair **et** en sombre, avec Playwright (`channel: 'chrome'`, `colorScheme`, `waitUntil: 'load'` : livereload empêche `networkidle` de jamais se terminer). Capturer le schéma dans l'article **et la lightbox ouverte** : c'est là que le fond blanc est resté la première fois, et rien d'autre ne l'attrape.
-
-## Gotcha 1 - la nav auto NE référence PAS l'article dans les index
-
-La nav latérale est auto-générée depuis l'arborescence, **mais il y a deux index maintenus à la main** qu'il faut éditer, sinon l'article est "orphelin" :
-
-- `docs/index.md` - page d'accueil, section `## CI/CD` (ou la section concernée).
-- `docs/<section>/index.md` - index de la section (ex. `docs/ci-cd/index.md`).
-
-Après avoir créé l'article, **grep les deux** pour un article voisin et ajouter la ligne au même endroit :
-
-```bash
-rg -n 'goreleaser|cocogitto' docs/index.md docs/ci-cd/index.md
-```
-
-## Gotcha 2 - markdownlint ne lint QUE les fichiers changés
-
-La CI `lint` passe les fichiers **modifiés dans le push** à `markdownlint-cli2`. Conséquence :
-
-- Toucher un vieil article peut réveiller une règle récente sur ses tableaux et casser la CI sans rapport avec ton changement.
-- **Politique du wiki** : tableaux compacts (`|---|`, sans alignement). `MD013` (longueur) et `MD060` (`table-column-style`) sont **désactivés** dans `.markdownlint.json` - ne pas les réactiver.
-
-Toujours relinter en local **avant de pousser**, avec la version exacte de la CI :
-
-```bash
-npx -y markdownlint-cli2@0.23.0 --config .markdownlint.json docs/**/tes-fichiers.md
-```
-
-## Gotcha 3 - MD046 casse sur les admonitions
-
-`markdownlint` ne connaît pas la syntaxe des admonitions MkDocs. Il lit le contenu indenté de 4 espaces comme un bloc de code indenté et `MD046` (`code-block-style: consistent`) casse. Deux cas :
-
-- **un bloc de code fencé dans une admonition** → erreur systématique
-- **une admonition à plusieurs paragraphes** → le 1er passe en continuation lâche, les suivants sont vus comme du code indenté
-
-La bonne réponse est de **sortir le bloc de code de l'admonition** et de garder l'admonition à un seul paragraphe. Pas d'ajout de `<!-- markdownlint-disable MD046 -->` : plusieurs vieux articles en contiennent un jamais réactivé, ce qui désactive la règle sur toute la fin du fichier et masque de vraies erreurs.
-
-## Gotcha 4 - `mkdocs build --strict` a besoin de `DYLD_FALLBACK_LIBRARY_PATH`
-
-Le plugin `social` génère les cartes via `cairosvg`, qui charge `libcairo` par `dlopen`. Le Python de `uv` ne regarde pas dans Homebrew, d'où 244 warnings `cairo` (un par page) qui font abort `--strict` sans aucun rapport avec le contenu.
-
-`~/.zshrc` exporte déjà la variable qui corrige ça, mais zsh ne source `.zshrc` que dans un shell **interactif** : un shell d'agent ne l'a jamais. Donc on préfixe la commande et on garde `--strict`, qui est exactement ce que fait la CI :
-
-```bash
-DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib:$HOME/lib:/usr/local/lib:/usr/lib" \
-  uv run mkdocs build --strict
-```
-
-Avec ça le build sort en 0. Le seul warning non bloquant qui reste est `WARNING:root:` du plugin git-revision-date, y compris en `--strict`.
-
-## Gotcha 5 - une ancre vers un titre accentué casse MD051
-
-MkDocs et markdownlint ne calculent pas la même ancre. MkDocs retire les accents et la ponctuation (`## Payer de la capacité disque` donne `#payer-de-la-capacite-disque`), markdownlint garde les accents et transforme ` : ` en `--`. Un lien `[...](#ancre)` vers un titre qui porte un accent ou un deux-points ne peut donc satisfaire que l'un des 2 : le build passe et `MD051/link-fragments` casse la CI. Renvoyer au titre en texte (`voir « Payer de la capacité disque pour acheter du débit » plus haut`), et ne garder un lien d'ancre que vers un titre sans accent ni ponctuation.
+Les 5 pièges (index à wirer, markdownlint sur les seuls fichiers changés, MD046 dans les admonitions, `DYLD_FALLBACK_LIBRARY_PATH`, ancres accentuées et MD051) sont détaillés dans `references/gotchas.md`. Le lire dès qu'un build ou un lint casse, et avant de poser un lien d'ancre.
 
 ## Common mistakes
 
