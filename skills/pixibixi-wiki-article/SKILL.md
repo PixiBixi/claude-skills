@@ -30,7 +30,7 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 4. **Cross-linker** les articles liés (dans les deux sens) via une admonition `!!! tip` ou un lien inline.
 5. **Schéma** si un *flux* le mérite (voir "Schémas SVG"). Sinon un tableau suffit.
 6. **⚠️ Wirer les DEUX index** (voir Gotcha 1) - l'étape le plus souvent oubliée.
-7. **Build + vérifier** : `mkdocs build --strict` préfixé du `DYLD_FALLBACK_LIBRARY_PATH` (Gotcha 4), puis relint markdown (Gotchas 2 et 3). Contrôler que le SVG est copié et la balise `<img>` résolue.
+7. **Build + vérifier** : `mkdocs build --strict` préfixé du `DYLD_FALLBACK_LIBRARY_PATH` (Gotcha 4), puis relint markdown (Gotchas 2, 3 et 5). Contrôler que le SVG est copié et la balise `<img>` résolue.
 8. **Vérifier l'exactitude** - invoquer le skill `wiki-fact-check`. L'étape 7 prouve que l'article s'affiche, pas qu'il dit vrai. Sur un article neuf ou une réécriture de fond, c'est non négociable. Le rapport passe par l'auteur avant correction.
 9. **Committer par scope** (Conventional Commits, un commit par portée), rebase sur `origin/master`, push.
 10. **Watcher la CI** : `gh run watch <id> --repo PixiBixi/pixibixi.github.io --exit-status`. Ne pas considérer le travail fini avant que `lint` **et** `deploy` soient verts.
@@ -281,6 +281,10 @@ DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib:$HOME/lib:/usr/local/lib:/usr/lib"
 ```
 
 Avec ça le build sort en 0. Le seul warning non bloquant qui reste est `WARNING:root:` du plugin git-revision-date, y compris en `--strict`.
+
+## Gotcha 5 - une ancre vers un titre accentué casse MD051
+
+MkDocs et markdownlint ne calculent pas la même ancre. MkDocs retire les accents et la ponctuation (`## Payer de la capacité disque` donne `#payer-de-la-capacite-disque`), markdownlint garde les accents et transforme ` : ` en `--`. Un lien `[...](#ancre)` vers un titre qui porte un accent ou un deux-points ne peut donc satisfaire que l'un des 2 : le build passe et `MD051/link-fragments` casse la CI. Renvoyer au titre en texte (`voir « Payer de la capacité disque pour acheter du débit » plus haut`), et ne garder un lien d'ancre que vers un titre sans accent ni ponctuation.
 
 ## Common mistakes
 
