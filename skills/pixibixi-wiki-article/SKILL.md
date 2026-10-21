@@ -51,6 +51,11 @@ Le `CLAUDE.md` du projet porte le style de fond (ton, structure, tournures). Ce 
 - **Jamais d'en dash (`U+2013`, tiret demi-cadratin) non plus**, et il arrive surtout dans les plages : versions, nombres, dates. On écrit `HAProxy 2.4 à 3.2`, pas `2.4` et `3.2` reliés par un `U+2013`. Même raison que l'em dash, il ne se tape pas au clavier. Selon la phrase : `à`, `de X à Y`, ou un simple `-`.
 - **Chiffres toujours en chiffres, jamais en lettres** : « 3 shards », « 12 fichiers », « 100 caches », y compris en début de phrase. Seule exception, les approximations restent en lettres (« une vingtaine de clusters », « la centaine de pods ») - les écrire en chiffres inventerait une précision qui n'existe pas.
 - **Un chiffre précis se justifie sur place, sinon il n'y est pas.** Écrire « garde 14 mois de métriques » en intro alors que le 14 vient d'un palier expliqué 100 lignes plus loin laisse le lecteur devant un nombre arbitraire. Soit on explique là, soit on reste générique (« aussi longtemps qu'on le lui demande ») et le chiffre arrive avec sa raison.
+
+    Un chiffre faux ou non sourcé ne se corrige pas en adverbe. Remplacer « 4-5x moins
+    cher » par « nettement moins cher » efface l'erreur et l'information avec. Chercher
+    le chiffre que l'éditeur publie, même partiel (« jusqu'à 91 % », doc Compute Engine),
+    et le lier à sa source.
 - **Unités de temps collées au chiffre** : `24h/24`, `12h`, `3h`, `6d`. Pas d'espace avant le symbole, c'est la convention de tout le wiki. La forme en mot (`12 heures`) reste valable en prose, mais on ne mélange pas `12 h` et `12h` dans le même article.
 - **Guillemets français** `« … »` avec une espace intérieure, pas de `"…"` droits dans la prose. C'est la convention des articles récents.
 - **Pas de virgule devant « et »**, ni devant « ou » et « ni ». C'est une faute, le réflexe vient de l'anglais où le comma before *and* est courant. On écrit « le cache et l'enveloppe mémoire », pas « le cache, et l'enveloppe mémoire ». Ça vaut aussi dans une énumération, où le français met la virgule entre les termes mais pas devant le dernier : « Ansible, Terraform et Makefile ». Attention au retour à la ligne, la faute se cache aussi à cheval sur 2 lignes, virgule en fin de ligne et `et` au début de la suivante, où un grep sur `, et` ne la voit pas.
@@ -132,6 +137,10 @@ Un `**Label**` posé en tête de bloc pour annoncer ce qui suit est un titre dé
 - ✅ `### Épingler la version` puis le paragraphe
 
 Le gras reste légitime à l'intérieur d'une phrase, ou en tête d'item de liste : là il insiste, il n'annonce pas une section.
+
+### Un projet tiers en titre porte son lien
+
+Un titre qui nomme une librairie ou un outil tiers (`### Solution 1 - KimMachineGun/automemlimit`) pose le lien vers son repo sur le nom, dans le titre même : c'est là que le lecteur le cherche. Appliquer à tous les titres de l'article du même type, pas seulement à celui signalé.
 
 ## Construire une phrase
 
