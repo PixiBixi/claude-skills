@@ -37,12 +37,13 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 
 ## Conventions MkDocs Material
 
-- **Frontmatter** obligatoire : `description:` (une phrase riche en mots-clés) + `tags:` (liste).
+- **Frontmatter** obligatoire : `description:` (une phrase riche en mots-clés, dont l'énumération se passe d'articles : « maxconn, buffers, sysctls et déploiement Kubernetes ») + `tags:` (liste).
 - **Admonitions** : `!!! note`, `!!! warning`, `!!! tip "Titre"` (contenu indenté de 4 espaces).
 - **Blocs de code titrés** : ` ```yaml title=".github/workflows/ci.yml" `.
 - **Commande et sortie dans un seul bloc `console`**, la commande préfixée de `$ `. Un bloc `bash` suivi d'un bloc `text` pour la sortie se lit comme 2 extraits sans rapport.
 - **Une liste dont chaque item porte un oui/non et sa raison devient un tableau** (`Opération | Couverte | Pourquoi`), comme 2 listes « ce qui passe » et « ce qui ne passe pas ».
-- **Les outils de l'auteur** : quand l'article montre une commande manuelle qu'un de ses projets couvre déjà (klens pour l'inspection read-only d'un cluster, par exemple), proposer de la remplacer par l'outil, lien vers le repo compris.
+- **Les outils de l'auteur** : quand l'article montre une commande manuelle qu'un de ses projets couvre déjà (klens pour l'inspection read-only d'un cluster, par exemple), proposer de la remplacer par l'outil, lien vers le repo compris. Ses sites de référence (rules.jdelgado.fr pour les règles Prometheus) vont aussi dans « Voir aussi », avec un lien direct sur le fichier concerné.
+- **Un tableau et le bloc de code qui le suit gardent le même ordre** : si le tableau présente `low` puis `high`, la config et la prose qui suivent aussi, sinon le lecteur croit les sens inversés.
 - **Liens internes** : chemins relatifs vers le `.md` (`goreleaser.md`, `github/go-ci.md`) - MkDocs les résout.
 - **Images/SVG** : `![Alt](nom.svg)` avec le fichier dans le même dossier que l'article.
 
@@ -77,7 +78,7 @@ Le `CLAUDE.md` du projet porte le style de fond (ton, structure, tournures). Ce 
     `un stack` n'en voit aucun. Chercher aussi les quantifieurs (`tous`, `certains`,
     `plusieurs`), les participes détachés du nom et les textes alternatifs des schémas,
     que personne ne relit.
-- **Le vocabulaire du domaine, pas son équivalent français.** La règle n'est pas une liste de mots, c'est un critère : si le terme est celui qu'on lit dans les flags, les métriques, la doc amont ou les dashboards, il reste tel quel. Traduire oblige le lecteur à refaire la correspondance dans sa tête au moment où il cherche justement à retrouver un flag. `timerange` et pas « plage de temps » ni « tranche de temps », `replicas` et pas « réplicas », `at scale` et pas « à l'échelle », `évicté` et pas « évincé », pour le spot comme pour un cache, `rollback` et pas « revenir en arrière », `lazy load` et `lazy download` et pas « lecture paresseuse » ni « téléchargement paresseux », même avec le flag sous les yeux. Les noms K8s et infra restent en anglais, sans accent.
+- **Le vocabulaire du domaine, pas son équivalent français.** La règle n'est pas une liste de mots, c'est un critère : si le terme est celui qu'on lit dans les flags, les métriques, la doc amont ou les dashboards, il reste tel quel. Traduire oblige le lecteur à refaire la correspondance dans sa tête au moment où il cherche justement à retrouver un flag. `timerange` et pas « plage de temps » ni « tranche de temps », `replicas` et pas « réplicas », `at scale` et pas « à l'échelle », `évicté` et pas « évincé », pour le spot comme pour un cache, `rollback` et pas « revenir en arrière », `tuning` et `tuner` et pas « régler » quand on parle de l'acte d'optimiser (un « réglage » reste le mot pour une option précise), `lazy load` et `lazy download` et pas « lecture paresseuse » ni « téléchargement paresseux », même avec le flag sous les yeux. Les noms K8s et infra restent en anglais, sans accent.
 
     Ça vaut **surtout dans les titres et les textes alternatifs**, qui sont écrits en
     dernier et relus le moins : c'est là que la traduction survit, alors que le corps du
@@ -176,7 +177,8 @@ Ce qui sonne faux, à la place :
 - **une liste écrite en paragraphes** : des paragraphes qui commencent tous par « Le flag `--x` décide… » sont une liste, ils passent en puces sous une phrase d'intro terminée par « : ».
 - **une option décrite sans dire laquelle on tourne** : après avoir présenté 2 stratégies ou 2 valeurs d'un flag, dire celle qu'on a (lue dans le repo, défaut compris) et pourquoi, en allant chercher la raison dans le code amont si elle n'a jamais été écrite (`recursive` passe par `IterWithAttributes`, que le caching bucket ne cache pas).
 - **un lien sur le titre recopié** : poser le lien sur un groupe de mots court de la phrase, « ont [leur propre page](thanos-cache.md) ». Un renvoi à une section se fait en lien, pas en texte (voir `references/gotchas.md`, Gotcha 5).
-- **le jargon non défini** (« fan-out ») : une infobulle dans `includes/abbreviations.md` plutôt qu'une définition en ligne.
+- **le jargon non défini** (« fan-out ») : une infobulle dans `includes/abbreviations.md` plutôt qu'une définition en ligne. Les termes mis en regard reçoivent chacun la leur : ECDSA sans RSA laisse le titre « ECDSA ou RSA » à moitié expliqué.
+- **« les défauts » employé seul** : on écrit « les valeurs par défaut » ou « les paramètres par défaut », « les défauts » se lit comme « les défaillances ».
 - **le gras** : le réserver au mot qui porte la thèse (« **il attend** », « **le filtrage à la source** », « **amplificateur** »). Un gras orphelin dont le lecteur ne voit pas l'opposition (« que cette stack **annonce** ») s'écrit en clair.
 - **l'absolu et le général non vérifiés** : « jamais », « irréductible pour tout le reste », « la moitié de ce qui la sollicite », « pousse la parallélisation plus haut » contredit 20 lignes plus bas. Chaque absolu se vérifie (code amont, config du repo) ou se nuance (« en principe », « certains déploiements »). Une recommandation ne se réécrit pas en « on a fait » sans preuve.
 - **un comportement qui dépend de la version, sans date** : « avec RF=2 une éviction est survivable » n'est vrai que depuis Thanos v0.37. Dater le comportement, citer la PR, et passer en `!!! warning` si l'ancien comportement casse quelque chose. Un bug d'un outil tiers décrit au présent se recherche aussi en amont : les compteurs Dragonfly à zéro sont émis depuis la v2.0.0 (PR #8052) alors que la prod tourne en v1.37, donc on écrit « Avant la v2.0.0 » et la version qu'on fait tourner.
