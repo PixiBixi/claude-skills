@@ -56,41 +56,21 @@ Le `CLAUDE.md` du projet porte le style de fond (ton, structure, tournures). Ce 
 - **Chiffres toujours en chiffres, jamais en lettres** : « 3 shards », « 12 fichiers », « 100 caches », y compris en début de phrase. Seule exception, les approximations restent en lettres (« une vingtaine de clusters », « la centaine de pods ») - les écrire en chiffres inventerait une précision qui n'existe pas.
 - **Un chiffre précis se justifie sur place, sinon il n'y est pas.** Écrire « garde 14 mois de métriques » en intro alors que le 14 vient d'un palier expliqué 100 lignes plus loin laisse le lecteur devant un nombre arbitraire. Soit on explique là, soit on reste générique (« aussi longtemps qu'on le lui demande ») et le chiffre arrive avec sa raison.
 
-    Un chiffre faux ou non sourcé ne se corrige pas en adverbe. Remplacer « 4-5x moins
-    cher » par « nettement moins cher » efface l'erreur et l'information avec. Chercher
-    le chiffre que l'éditeur publie, même partiel (« jusqu'à 91 % », doc Compute Engine),
-    et le lier à sa source.
+    Un chiffre faux ou non sourcé ne se corrige pas en adverbe. Remplacer « 4-5x moins cher » par « nettement moins cher » efface l'erreur et l'information avec. Chercher le chiffre que l'éditeur publie, même partiel (« jusqu'à 91 % », doc Compute Engine), et le lier à sa source.
 - **Unités de temps collées au chiffre** : `24h/24`, `12h`, `3h`, `6d`. Pas d'espace avant le symbole, c'est la convention de tout le wiki. La forme en mot (`12 heures`) reste valable en prose, mais on ne mélange pas `12 h` et `12h` dans le même article.
 - **Guillemets français** `« … »` avec une espace intérieure, pas de `"…"` droits dans la prose. C'est la convention des articles récents.
 - **Pas de virgule devant « et »**, ni devant « ou » et « ni ». C'est une faute, le réflexe vient de l'anglais où le comma before *and* est courant. On écrit « le cache et l'enveloppe mémoire », pas « le cache, et l'enveloppe mémoire ». Ça vaut aussi dans une énumération, où le français met la virgule entre les termes mais pas devant le dernier : « Ansible, Terraform et Makefile ». Attention au retour à la ligne, la faute se cache aussi à cheval sur 2 lignes, virgule en fin de ligne et `et` au début de la suivante, où un grep sur `, et` ne la voit pas.
 
-    Une virgule qui **ferme une incise** juste avant le « et » est grammaticalement
-    correcte (« le `main:` du build, qui vaut `""` tant qu'on ne l'a pas écrit, et ko
-    passe cette chaîne vide »), mais l'auteur la refuse à la lecture comme les autres
-    (« 3 caches, un par type de donnée, et ils… »). On ne la garde pas : on coupe la
-    phrase ou on transforme l'incise en relative sans virgule. Un remplacement global ne
-    la retire pas pour autant à l'aveugle, puisque retirer la seule virgule casse la phrase.
+    Une virgule qui **ferme une incise** juste avant le « et » est grammaticalement correcte (« le `main:` du build, qui vaut `""` tant qu'on ne l'a pas écrit, et ko passe cette chaîne vide »), mais l'auteur la refuse à la lecture comme les autres (« 3 caches, un par type de donnée, et ils… »). On ne la garde pas : on coupe la phrase ou on transforme l'incise en relative sans virgule. Un remplacement global ne la retire pas pour autant à l'aveugle, puisque retirer la seule virgule casse la phrase.
 - **Genre des acronymes et des composants** : il suit le nom-tête de l'expression développée, pas l'anglais. Une TSDB (*Database*), une API (*interface*), une VM (*machine*), une stack (*pile*), une store gateway (*passerelle*), une query (*requête*). Mais **un querier**, qui est le composant et pas la requête, un query frontend dont la tête est *frontend*, un compactor. Accorder aussi les pronoms et adjectifs.
 
-    L'accord voyage plus loin que le déterminant collé au mot, et c'est là que la faute
-    survit à la relecture. `attend tous les stacks`, `partagés par tous les stacks` et
-    `les stacks annotés` sont faux au même titre que `un stack`, mais un grep sur
-    `un stack` n'en voit aucun. Chercher aussi les quantifieurs (`tous`, `certains`,
-    `plusieurs`), les participes détachés du nom et les textes alternatifs des schémas,
-    que personne ne relit.
+    L'accord voyage plus loin que le déterminant collé au mot, et c'est là que la faute survit à la relecture. `attend tous les stacks`, `partagés par tous les stacks` et `les stacks annotés` sont faux au même titre que `un stack`, mais un grep sur `un stack` n'en voit aucun. Chercher aussi les quantifieurs (`tous`, `certains`, `plusieurs`), les participes détachés du nom et les textes alternatifs des schémas, que personne ne relit.
 - **Le vocabulaire du domaine, pas son équivalent français.** La règle n'est pas une liste de mots, c'est un critère : si le terme est celui qu'on lit dans les flags, les métriques, la doc amont ou les dashboards, il reste tel quel. Traduire oblige le lecteur à refaire la correspondance dans sa tête au moment où il cherche justement à retrouver un flag. `timerange` et pas « plage de temps » ni « tranche de temps », `replicas` et pas « réplicas », `at scale` et pas « à l'échelle », `évicté` et pas « évincé », pour le spot comme pour un cache, `rollback` et pas « revenir en arrière », `tuning` et `tuner` et pas « régler » quand on parle de l'acte d'optimiser (un « réglage » reste le mot pour une option précise), `lazy load` et `lazy download` et pas « lecture paresseuse » ni « téléchargement paresseux », même avec le flag sous les yeux. Les noms K8s et infra restent en anglais, sans accent.
 
-    Ça vaut **surtout dans les titres et les textes alternatifs**, qui sont écrits en
-    dernier et relus le moins : c'est là que la traduction survit, alors que le corps du
-    texte emploie déjà le bon terme deux paragraphes plus haut. Avant de committer, grep
-    les traductions des termes que l'article utilise vraiment, pas seulement celles listées
-    ici, et vérifier le sommaire de droite qui n'affiche que les titres.
+    Ça vaut **surtout dans les titres et les textes alternatifs**, qui sont écrits en dernier et relus le moins : c'est là que la traduction survit, alors que le corps du texte emploie déjà le bon terme deux paragraphes plus haut. Avant de committer, grep les traductions des termes que l'article utilise vraiment, pas seulement celles listées ici, et vérifier le sommaire de droite qui n'affiche que les titres.
 
-    L'inverse est vrai aussi, le critère n'est pas « angliciser par défaut ». Quand la
-    phrase parle de l'acte et pas du composant, le mot français gagne : on écrit « la
-    requête met 26 secondes » et pas « la query », alors que `query frontend` reste le nom
-    du composant et ne se traduit jamais. Même partage entre `un cache` et le fait de
-    cacher, `un shard` et le fait de découper.
+    L'inverse est vrai aussi, le critère n'est pas « angliciser par défaut ». Quand la phrase parle de l'acte et pas du composant, le mot français gagne : on écrit « la requête met 26 secondes » et pas « la query », alors que `query frontend` reste le nom du composant et ne se traduit jamais. Même partage entre `un cache` et le fait de cacher, `un shard` et le fait de découper.
+- **Jamais de hard-wrap dans la prose** : un paragraphe tient sur une seule ligne, MkDocs et l'éditeur font le retour. Une coupe manuelle à 80 colonnes laisse des lignes inégales à chaque retouche, produit des diffs illisibles et cache les fautes à cheval sur 2 lignes. Un article reçu coupé se déplie avant toute relecture.
 - **Attention aux remplacements globaux** : `réplica` → `replica` mange aussi `réplication`, qui est un mot français et garde son accent. Ancrer les motifs sur une frontière de mot et relire le diff.
 
 ## Titres
@@ -146,15 +126,21 @@ Le gras reste légitime à l'intérieur d'une phrase, ou en tête d'item de list
 
 Un titre qui nomme une librairie ou un outil tiers (`### Solution 1 - KimMachineGun/automemlimit`) pose le lien vers son repo sur le nom, dans le titre même : c'est là que le lecteur le cherche. Appliquer à tous les titres de l'article du même type, pas seulement à celui signalé.
 
+## Ouvrir l'article
+
+Le premier paragraphe ne commence pas par l'outil (« GoReleaser génère le changelog… ») : sous le H1, c'est trop brut. Il pose d'abord le problème que l'article résout, puis ce qu'on obtient à la fin, et l'outil n'arrive qu'après :
+
+> Une release Go publiée à la main demande de compiler pour chaque plateforme, d'empaqueter, de calculer les checksums, de signer et d'écrire les notes. Chacune de ces étapes peut être oubliée sans que rien ne le signale. Le pipeline décrit ici les enchaîne toutes à partir d'un simple push sur `main` et publie les binaires multi-arch, l'image OCI, la signature, le SBOM et les notes de release.
+
+Le paragraphe suivant ne répète pas ce que l'accroche a déjà énuméré. Quand l'auteur refuse une ouverture, proposer 3 accroches (le problème, le résultat, l'enjeu), il en combine souvent 2.
+
 ## Construire une phrase
 
 L'erreur la plus fréquente, c'est de découper pour faire du rythme. Une phrase longue construite en enchaînant des relatives passe très bien ; une suite de fragments courts sonne faux.
 
 **Ne pas** viser un plafond de mots par phrase. Cette voix accepte 40 mots quand ils coulent :
 
-> Une store gateway qui sert tout le bucket doit être dimensionnée pour la requête la plus
-> violente qu'on lui posera jamais, par exemple un dashboard avec un timerange de 6 mois
-> qui va charger énormément de donnée en RAM sur tous les replicas.
+> Une store gateway qui sert tout le bucket doit être dimensionnée pour la requête la plus violente qu'on lui posera jamais, par exemple un dashboard avec un timerange de 6 mois qui va charger énormément de donnée en RAM sur tous les replicas.
 
 Ce qui sonne faux, à la place :
 
@@ -167,6 +153,7 @@ Ce qui sonne faux, à la place :
 - **une phrase qui s'ouvre sur un connecteur ou un reste d'oral** : « Et », « Mais », « Or », « Encore faut-il », « Reste à », « Sauf que », « D'où », « Ça se lit… ». Reformuler avec un sujet (« Il faut ensuite choisir… », « Les métriques existantes le montraient déjà »). Même chose pour un paragraphe qui commence par du code inline : « Le flag `--x` … ».
 - **les chaînes de conséquences** « , ce qui veut dire », « , donc … , donc », « , parce que », « tout seul, parce que ». Couper en 2 phrases. Une phrase longue passe quand ses relatives coulent, pas quand elle empile des conséquences ou 2 incises à virgules.
 - **le raccourci elliptique** qui oblige à relire : « n'accuse pas son dashboard », « les plus lentes étaient triviales ». Dire le mécanisme en clair : « des requêtes simples qui attendaient la stack la plus lente ».
+- **une relative en incise entre le sujet et le verbe** : « Le chart Helm, que GoReleaser ne gère pas, part dans un step à part ». Coordonner les 2 propositions : « Le chart Helm n'est pas géré par GoReleaser et part dans un step à part ».
 - **la règle avant sa raison** : « Cette liste doit sortir dans le même ordre » puis l'explication. Poser le problème d'abord, la règle ensuite.
 - **un mot de remplacement pour un terme déjà posé** : « branche » ou « feuille » pour une stack, « nuance » pour ce qui décide de tout. Garder le mot de l'article.
 - **un mot approximatif ou inventé pour un objet réel** : « le registre de clusters » pour le générateur `clusters` d'ArgoCD, « l'option qui rend le tout praticable ». Nommer l'objet tel qu'il existe.
