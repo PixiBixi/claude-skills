@@ -1,0 +1,62 @@
+[
+    {
+        "query": "check tout le dash stp j'ai énormément de no data https://grafana.example.com/d/thanos-start-here/thanos-0-start-here",
+        "should_trigger": true
+    },
+    {
+        "query": "Pas de filtre cluster sur le dashboard cf63ey2hhixoga, ses panels additionnent tous les clusters sur Thanos Dev, corrige",
+        "should_trigger": true
+    },
+    {
+        "query": "fais-moi un dash pour le DaemonSet node-exporter : CPU, mémoire et pods down",
+        "should_trigger": true
+    },
+    {
+        "query": "la variable pod met 40s à charger sur ce dashboard, pourquoi ?",
+        "should_trigger": true
+    },
+    {
+        "query": "quels dashboards lisent container_memory_failures_total ? on veut la dropper au scrape",
+        "should_trigger": true
+    },
+    {
+        "query": "ce panel affiche 3x le vrai QPS, le chiffre est plausible mais faux",
+        "should_trigger": true
+    },
+    {
+        "query": "range les dashboards du composant cloudprober dans un dossier propre",
+        "should_trigger": true
+    },
+    {
+        "query": "le dashboard thanos read path fait OOM le query-frontend quand on passe sur 7 jours",
+        "should_trigger": true
+    },
+    {
+        "query": "le panel GCM des load balancers est en no data, la datasource cloud monitoring répond 403",
+        "should_trigger": false
+    },
+    {
+        "query": "ajoute une alerte si le taux d'erreur du bidder dépasse 2% pendant 10 min",
+        "should_trigger": false
+    },
+    {
+        "query": "fais-moi un PNG qui compare la latence p99 de la v1.42 et de la v1.43 pour le ticket",
+        "should_trigger": false
+    },
+    {
+        "query": "pourquoi l'alerte ThanosCompactHalted sonne depuis ce matin ?",
+        "should_trigger": false
+    },
+    {
+        "query": "rightsize les requests mémoire de thanos-receive sur une semaine",
+        "should_trigger": false
+    },
+    {
+        "query": "le store gateway sature à chaque requête globale, revois les values Thanos",
+        "should_trigger": false
+    },
+    {
+        "query": "check les alertes d'hier sur alerts-platform",
+        "should_trigger": false
+    }
+]

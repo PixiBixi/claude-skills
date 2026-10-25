@@ -1,6 +1,6 @@
 ---
 name: grafana-dashboards
-description: Use for ANY Grafana dashboard work, load it BEFORE gcx:create-dashboard or manage-dashboards (generic, they lack the house rules). Triggers - a dashboard URL (`/d/<uid>`) pasted, "dash" or "panel", creating, editing, redesigning or cleaning up a dashboard, PromQL on a Thanos or Prometheus datasource, a dashboard that OOMs the query layer, empty panels, slow template variables, a plausible but wrong number, the folder layout of a component's dashboards, or an audit of every dashboard reading a given metric or datasource. For Google Cloud Monitoring (stackdriver) panels use grafana-cloud-monitoring instead.
+description: Use for ANY Grafana dashboard work, load it BEFORE gcx:create-dashboard or manage-dashboards (generic, they lack the house rules). Triggers - a dashboard URL (`/d/<uid>`) pasted, "dash" or "panel", creating, editing, redesigning or cleaning up a dashboard, PromQL on a Thanos or Prometheus datasource, a dashboard that OOMs the query layer, empty panels, slow template variables, a plausible but wrong number, the folder layout of a component's dashboards, or an audit of every dashboard reading a given metric or datasource. Not for Google Cloud Monitoring (stackdriver) panels (grafana-cloud-monitoring), an alert rule (equativ-add-alert), or a one-off PNG chart for a ticket (charting-grafana-metrics).
 ---
 
 # Authoring Grafana dashboards and PromQL
