@@ -1,6 +1,6 @@
 ---
 name: scoping-a-website
-description: Scopes a website before any design or code - reads the existing site, interviews the user in short rounds (purpose, identity, taste, constraints), writes a one-page brief with an architecture verdict (static, SSG, islands or SPA), gets it approved, then prototypes three live directions; for a site whose design is kept, measures it and plans a performance pass. Use when the user asks to create, redesign, rebuild or restyle a website, landing page, portfolio, showcase site or web front end, asks for a design proposal for a site URL ("propose-moi un design" plus a link), asks whether something should be a SPA, is tired of their site's design ("refais mon site", "j'en ai marre du design", "fais-moi des maquettes", "surprends-moi"), or wants an existing site faster or better on mobile ("le site rame", "c'est lent sur mobile", "Lighthouse"). Not for a one-off HTML page or report to share, a single CSS bug, backend latency, or benchmarking third-party sites the user will not change.
+description: Scoping and design direction for a website before any design or code is written, including the static vs SSG vs SPA call and a performance pass on a site whose design is kept. Use when the user asks to create, redesign, rebuild or restyle a website, landing page, portfolio, showcase site or web front end, asks for a design proposal for a site URL ("propose-moi un design" plus a link), asks whether something should be a SPA, is tired of their site's design ("refais mon site", "j'en ai marre du design", "fais-moi des maquettes", "surprends-moi"), or wants an existing site faster or better on mobile ("le site rame", "c'est lent sur mobile", "Lighthouse"). Not for a one-off HTML page or report to share (artifact-design), a single CSS bug, backend latency, or benchmarking third-party sites the user will not change.
 ---
 
 # Scoping a website
@@ -13,9 +13,9 @@ Every pixel made before the brief exists is a guess, and each wrong guess costs 
 
 ## Round 0: read before asking
 
-Silently gather what the repo, the context and any URL the user gave already answer (fetch the page, screenshot it with `scripts/screenshot.sh` when a browser is available, note its content, palette, fonts and stack): existing site and its stack, build step, hosting and deploy, CSP and external-dependency policy, analytics, i18n, past design feedback in memory or project docs. Never ask a question the repo answers; state the answer in the brief instead.
+Silently gather what the repo, the context and any URL the user gave already answer (fetch the page, screenshot it with `${CLAUDE_SKILL_DIR}/scripts/screenshot.sh` when a browser is available, note its content, palette, fonts and stack): existing site and its stack, build step, hosting and deploy, CSP and external-dependency policy, analytics, i18n, past design feedback in memory or project docs. Never ask a question the repo answers; state the answer in the brief instead.
 
-For an existing live site, run `scripts/sitemap-inventory.py <url>`: it reads `/robots.txt` and the sitemaps (or the home page links without one) and groups the URLs into page templates with their counts and one sample URL each. This inventory answers "number of pages" in Round 1. Open the samples and note the defects they reveal (CMS sample pages, stubs, wrong headings, outdated content) under open questions in the brief.
+For an existing live site, run `${CLAUDE_SKILL_DIR}/scripts/sitemap-inventory.py <url>`: it reads `/robots.txt` and the sitemaps (or the home page links without one) and groups the URLs into page templates with their counts and one sample URL each. This inventory answers "number of pages" in Round 1. Open the samples and note the defects they reveal (CMS sample pages, stubs, wrong headings, outdated content) under open questions in the brief.
 
 ## Rounds 1 to 4: the questions
 
@@ -86,7 +86,7 @@ Open questions / placeholders:
 
 ## Before showing anything
 
-Read `references/prototype-checklist.md` and apply it to every prototype: readability, the four widths in both themes via `scripts/screenshot.sh`, motion checked in a real browser, and the performance rules (deferred libraries, preloaded fonts, lazy images, paused offscreen loops).
+Read `references/prototype-checklist.md` and apply it to every prototype: readability, the four widths in both themes via `${CLAUDE_SKILL_DIR}/scripts/screenshot.sh`, motion checked in a real browser, and the performance rules (deferred libraries, preloaded fonts, lazy images, paused offscreen loops).
 
 ## Common mistakes
 

@@ -12,7 +12,7 @@ Each item below was a defect the user caught on a shown mockup. Checking them fi
 
 ## Screenshots
 
-Run `scripts/screenshot.sh <url> <out-dir>`: it captures 375, 768, 1440 and 2560px in both themes and names each file after its width and theme. Name the theme of each capture when showing it.
+Run `${CLAUDE_SKILL_DIR}/scripts/screenshot.sh <url> <out-dir>`: it captures 375, 768, 1440 and 2560px in both themes and names each file after its width and theme. Name the theme of each capture when showing it.
 
 Open every capture before showing or judging it: a blank, unstyled or error page is a failed capture, not a finding about the site.
 
