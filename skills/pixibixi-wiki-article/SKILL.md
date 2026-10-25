@@ -26,7 +26,7 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 
 1. **Explorer** la section cible et **lire un article voisin** pour caler le style (frontmatter, ton, structure).
 2. **Rédiger** l'article. Ancrer sur du réel (code, mesures, repos existants), pas du tuto générique. Une valeur par défaut, un chiffre de perf ou un nom de métrique s'écrit **avec sa source sous les yeux** : sinon on ne l'écrit pas, on va la chercher. Sur 9 articles relus, ces 2 familles pesaient 17 erreurs sur 49.
-3. **Passer la voix au filtre** - invoquer le skill `humanizer` pour que ça sonne comme l'auteur, pas comme un bot.
+3. **Passer la voix au filtre** - invoquer le skill `humanizer` (obligatoire, pas optionnel) pour que ça sonne comme l'auteur, pas comme un bot. Tournures rejetées à chaque relecture : slogan à deux-points (`Notre compromis : ...`), phrase qui commence par `Encore`, `tout seul, parce que`, `voie médiane`, `, ce ...` en relance. Le hook `wordlist-guard` signale les plus fréquentes.
 4. **Cross-linker** les articles liés (dans les deux sens) via une admonition `!!! tip` ou un lien inline.
 5. **Schéma** si un *flux* le mérite (voir "Schémas SVG"). Sinon un tableau suffit.
 6. **⚠️ Wirer les DEUX index** (voir Gotcha 1) - l'étape le plus souvent oubliée.
