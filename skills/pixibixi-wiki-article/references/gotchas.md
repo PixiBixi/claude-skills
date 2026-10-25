@@ -37,6 +37,8 @@ La bonne réponse est de **sortir le bloc de code de l'admonition** et de garder
 
 Un repli `???` autour d'un bloc de code ne sert plus à rien non plus : `jd-codefold.js` replie tout bloc de plus de 30 lignes sur le site. Le titre de l'admonition devient le `title="..."` du bloc fencé. Le `???` reste réservé à de la prose qu'on cache exprès, comme une section archivée.
 
+Les onglets (`=== "Label"`, `pymdownx.tabbed`) suivent la même mécanique. On colle le contenu indenté **directement** sous la ligne `=== "Label"`, sans ligne vide, et on ne met pas de ligne vide entre une phrase et un bloc fencé dans le même onglet : la ligne vide fait lire la suite comme du code indenté et MD046 casse. Le thème habille un onglet comme un bloc de code, donc on n'y met que du code ou une capture, et la phrase qui introduit les variantes reste au-dessus du groupe. Un onglet n'est valable que si le lecteur choisit une variante parmi plusieurs (distro, méthode d'install, shell, captures de dashboards), jamais pour des étapes à enchaîner. Les H3 remplacés par des onglets sortent du sommaire et perdent leur ancre.
+
 ## Gotcha 4 - `mkdocs build --strict` a besoin de `DYLD_FALLBACK_LIBRARY_PATH`
 
 Le plugin `social` génère les cartes via `cairosvg`, qui charge `libcairo` par `dlopen`. Le Python de `uv` ne regarde pas dans Homebrew, d'où 244 warnings `cairo` (un par page) qui font abort `--strict` sans aucun rapport avec le contenu.
