@@ -1,6 +1,6 @@
 ---
 name: grafana-cloud-monitoring
-description: Use when a Grafana panel queries Google Cloud Monitoring (the cloud-monitoring datasource, plugin type stackdriver), in PromQL or native MQL mode, or when migrating panels off a stackdriver-exporter onto it. Covers a GCM panel reading No data or falling back to the Builder query type, errors on monitored_resource, resource_container or a JSON parse that is really a 403, converting a Cloud Monitoring metric type or a GMP metric to its PromQL name, a table that lost its label columns, quota metrics that read empty because they publish sparsely, and template variables that die because a GCM datasource cannot serve label_values.
+description: Use when a Grafana panel queries Google Cloud Monitoring (the cloud-monitoring datasource, plugin type stackdriver), in PromQL or native MQL mode, or when migrating panels off a stackdriver-exporter onto it. Covers a GCM panel in No data or 403, converting a Cloud Monitoring or GMP metric type to its PromQL name, quota metrics that read empty, and template variables on a GCM datasource. Triggers - "la datasource GCM a pas de data", "ils sont dans google cloud monitoring, va check", "check si des dashboards utilisent des métriques stackdriver", "migre le panel du stackdriver_exporter". Not for Prometheus or Thanos panels and general dashboard work (grafana-dashboards), or the alert rule itself (equativ-add-alert).
 ---
 
 # Grafana on Google Cloud Monitoring (GCM)
@@ -57,42 +57,9 @@ monitored resource types [consumer_quota producer_quota] are possible
 - `textbox` defaulting to `.*` for a label filter. It survives a new label value appearing, where a `custom` list with `includeAll` silently hides it: `All` expands to the hardcoded options only, which is the "panel lies with no visible symptom" failure again.
 A regex textbox works unchanged in both languages: `service=~"$service"` in PromQL, `| filter resource.service =~ '$service'` in MQL.
 
-## Native MQL mode: deprecated, existing panels only
-**Google has deprecated MQL: write every new panel in PromQL**, and when you touch an existing MQL panel, migrate it to PromQL rather than extending it. A usage/limit/ratio table costs 3 PromQL targets plus a `merge` where MQL did it in one, which is the price of staying on the supported language. What follows is here to read and migrate the MQL panels that still exist.
+## Native MQL mode
 
-Label placement is not guessable, read it off the descriptors: metric labels are `metric.<key>` (from `metricDescriptors`), resource labels are `resource.<key>` (from `monitoredResourceDescriptors/<type>`). For `consumer_quota` that is `metric.quota_metric` against `resource.project_id` / `resource.service` / `resource.location`.
-
-```text
-{
-  fetch consumer_quota::serviceruntime.googleapis.com/quota/allocation/usage
-  | within 6h
-  | group_by [resource.project_id, resource.service, resource.location, metric.quota_metric], max(val())
-  ;
-  fetch consumer_quota::serviceruntime.googleapis.com/quota/limit
-  | within 6h
-  | group_by [resource.project_id, resource.service, resource.location, metric.quota_metric], min(val())
-}
-| join
-| value [usage: val(0), limit: val(1), ratio: val(0)/val(1)]
-| filter resource.service =~ '$service'
-| filter ratio > 0.8
-```
-`{A ; B} | join` pairs the two streams on their common labels, `| value [...]` names the output columns, and `| filter` / `| top 10, ratio` chain after it on those names. Chained `| filter` steps are fine. The `| within 6h` belongs on each `fetch`, not at the end.
-
-The target shape, and note there is **no stub to ship** here: `timeSeriesQuery` *is* in `migrateQuery()`'s short-circuit list, unlike `promQLQuery`.
-```json
-{
-  "queryType": "timeSeriesQuery",
-  "timeSeriesQuery": {
-    "projectName": "$project_id", "graphPeriod": "disabled", "query": "<MQL>"
-  }
-}
-```
-Two things to expect on the panel side:
-- **Column names.** Whether Grafana exposes a label as `resource.project_id` or `project_id` is not worth a guess: put **both spellings** in the `organize` transformation's `renameByName`. An unmatched rename is a no-op, so the worst case is a raw column name, never a broken panel. The natural column order MQL returns is already the label order of your `group_by` followed by the `value` columns, so drop `indexByName` rather than fighting it.
-- **MQL has no `absent()`**, so none of the healthy-state recipes above port. A `| filter ratio > 0.8` table reads "No data" when everything is fine. Use `fieldConfig.defaults.noValue` on the panel (`"No quota above 80%"`) as the equivalent.
-
-Prove a filter actually filters before trusting an empty panel: run it at a threshold you know is crossed (`> 0.3`) and check rows come back.
+Write new panels in PromQL only: Google has deprecated MQL. Before touching an existing MQL panel (migrating it to PromQL, reading its column names or label placement), read `references/mql.md`.
 
 ## Pre-flight
 Check `gcx` before any Grafana call in this skill:
@@ -106,26 +73,8 @@ gcx config check || { echo "not ready: gcx login"; exit 1; }
 gcx datasources cloudmonitoring query -d <ds-uid> --project <project> \
   --metric <cloud-monitoring-metric-type> --since 1h
 ```
-For a PromQL-syntax pre-flight, or to prove the query as your own credentials rather than the datasource's service account (which proves the query and the metric name, never the permissions), hit the Cloud Monitoring API directly instead:
-```bash
-curl -s -G -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-  --data-urlencode 'query=count(<metric>) or on() vector(-1)' \
-  "https://monitoring.googleapis.com/v1/projects/<project>/location/global/prometheus/api/v1/query"
-```
-To settle a metric name, list what the project actually exports, which is faster and safer than any doc:
-```bash
-curl -s -G -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-  --data-urlencode 'filter=metric.type = starts_with("container.googleapis.com/quota")' \
-  'https://monitoring.googleapis.com/v3/projects/<project>/metricDescriptors'
-```
-Use the descriptors API rather than a regex on the name: `__name__=~"..."` is rejected with `=~ is an unsupported matchtype for the __name__ label`.
+To prove a query with your own credentials rather than the datasource's service account, settle a metric name from the descriptors, or see the columns an MQL query returns, read `references/api-queries.md`.
 
-MQL is a different endpoint, a POST on v3, and it is worth running because the response tells you the column names the panel will get (`labelDescriptors` and `pointDescriptors`):
-```bash
-curl -s -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-  -H "Content-Type: application/json" -d '{"query": "<MQL>"}' \
-  "https://monitoring.googleapis.com/v3/projects/<project>/timeSeries:query"
-```
 
 ## Common mistakes
 | Symptom | Cause | Fix |
