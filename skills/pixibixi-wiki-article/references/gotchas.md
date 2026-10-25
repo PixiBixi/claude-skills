@@ -35,6 +35,8 @@ npx -y markdownlint-cli2@0.23.0 --config .markdownlint.json docs/**/tes-fichiers
 
 La bonne réponse est de **sortir le bloc de code de l'admonition** et de garder l'admonition à un seul paragraphe. Pas d'ajout de `<!-- markdownlint-disable MD046 -->` : plusieurs vieux articles en contiennent un jamais réactivé, ce qui désactive la règle sur toute la fin du fichier et masque de vraies erreurs.
 
+Un repli `???` autour d'un bloc de code ne sert plus à rien non plus : `jd-codefold.js` replie tout bloc de plus de 30 lignes sur le site. Le titre de l'admonition devient le `title="..."` du bloc fencé. Le `???` reste réservé à de la prose qu'on cache exprès, comme une section archivée.
+
 ## Gotcha 4 - `mkdocs build --strict` a besoin de `DYLD_FALLBACK_LIBRARY_PATH`
 
 Le plugin `social` génère les cartes via `cairosvg`, qui charge `libcairo` par `dlopen`. Le Python de `uv` ne regarde pas dans Homebrew, d'où 244 warnings `cairo` (un par page) qui font abort `--strict` sans aucun rapport avec le contenu.
