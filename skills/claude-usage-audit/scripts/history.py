@@ -9,14 +9,8 @@ DAYS = int(os.environ.get("AUDIT_DAYS", "90"))
 NOW = datetime.now(timezone.utc)
 SINCE = NOW - timedelta(days=DAYS)
 HOME = os.path.expanduser("~")
-PRICES = {"claude-opus-5-5": (4, 20, .2), "claude-opus-5": (5, 25, .5), "claude-opus-4-8": (5, 25, .5),
-          "claude-opus-4-7": (5, 25, .5), "claude-sonnet-5-5": (2, 10, .2), "claude-sonnet-5": (2, 10, .2),
-          "claude-sonnet-4-6": (3, 15, .3), "claude-haiku-4-5": (1, 5, .1)}
-
-def price(m):
-    for k in sorted(PRICES, key=len, reverse=True):
-        if m and m.startswith(k): return PRICES[k]
-    return (0, 0, 0)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # -I drops the script dir from sys.path
+from prices import price_for, exit_code
 
 def week(t):
     y, w, _ = t.isocalendar()
@@ -80,7 +74,7 @@ for f in glob.glob(f"{HOME}/.claude/projects/**/*.jsonl", recursive=True):
         t = datetime.fromisoformat(d["timestamp"].replace("Z", "+00:00"))
         if t < SINCE: continue
         first_tx = min(first_tx or t, t)
-        i, o, cr = price(m["model"])
+        i, o, cr = price_for(m["model"]) or (0, 0, 0)
         cc = u.get("cache_creation") or {}
         w1 = cc.get("ephemeral_1h_input_tokens", 0) or 0
         w5 = (u.get("cache_creation_input_tokens", 0) or 0) - w1
@@ -112,3 +106,4 @@ out = dict(
 json.dump(out, open(sys.argv[1], "w"), indent=1, default=str)
 print(json.dumps({k: v for k, v in out.items() if k not in ("heat", "weekly")}, indent=1, default=str))
 for w in weekly: print(w)
+sys.exit(exit_code())
