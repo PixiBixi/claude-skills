@@ -6,8 +6,8 @@ description: >
   cette erreur ?", "wtf ce plan", "lis le plan il est chelou", "check moi le plan", "le job
   est rouge". Covers resolving the URL, pulling the log to a file, finding the first real
   error, and reading a Terraform/Terragrunt plan critically (destroys, replacements,
-  unexpected units). Read-only. Not for checking a rollout after a merge or for reviewing
-  the MR diff itself.
+  unexpected units). Read-only. Not for checking a rollout after a merge (post-merge-verify)
+  or for reviewing the MR diff itself (platform-mr-review).
 ---
 
 # GitLab job triage
