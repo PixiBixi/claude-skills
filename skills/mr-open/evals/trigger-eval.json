@@ -1,0 +1,57 @@
+[
+    {
+        "query": "fais la MR stp, c'est le fix du timeout sur le healthcheck de l'ingress",
+        "should_trigger": true
+    },
+    { "query": "ok c'est bon pour moi, commit & push", "should_trigger": true },
+    {
+        "query": "fais des commits propres et push, y'a le module et le live dans le diff",
+        "should_trigger": true
+    },
+    {
+        "query": "fix ça et ouvre la MR après, ticket PE-2612",
+        "should_trigger": true
+    },
+    {
+        "query": "ajoute un commit à la MR pour le renommage de la variable et update la description",
+        "should_trigger": true
+    },
+    {
+        "query": "push et MR, target develop sur ce repo",
+        "should_trigger": true
+    },
+    {
+        "query": "open a PR on github for the kubectl-ice changes, the README needs the new flag too",
+        "should_trigger": true
+    },
+    {
+        "query": "update la MR, j'ai rebase sur main et changé l'approche pour le cache",
+        "should_trigger": true
+    },
+    {
+        "query": "merge tout ce qui est vert sur PE-2450",
+        "should_trigger": false
+    },
+    {
+        "query": "dans quel ordre je merge les MR de iac-core et argocd-conf ?",
+        "should_trigger": false
+    },
+    {
+        "query": "check la review de Thomas sur la MR 412, il a laissé 3 commentaires",
+        "should_trigger": false
+    },
+    { "query": "review la MR 1287 sur iac-core stp", "should_trigger": false },
+    {
+        "query": "j'ai merge, check le rollout sur prod-delivery",
+        "should_trigger": false
+    },
+    {
+        "query": "pourquoi le job terragrunt plan de ma MR est rouge ? https://gitlab.com/x/iac-core/-/jobs/9912",
+        "should_trigger": false
+    },
+    { "query": "c'est tout mergé pour PE-2450 ?", "should_trigger": false },
+    {
+        "query": "tag la nouvelle version du module gke et bump module.hcl",
+        "should_trigger": false
+    }
+]
