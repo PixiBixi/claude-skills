@@ -7,8 +7,12 @@ Reads plugins/wiki/skills/**/*.md and understands three citation forms:
   - an article letter declared as "- T = <url>" or "- T: <url>", then "T #<anchor>" anywhere
   - bare "- #<anchor>" list items under an "Anchors for T" line
 Exit 1 when a page or an anchor is missing, 2 when the site cannot be fetched.
+
+With --site DIR, reads a local MkDocs build instead of the published site: the wiki CI runs it
+before deploying, so a heading rename fails there instead of breaking the citation silently.
 """
 
+import argparse
 import re
 import sys
 import urllib.error
@@ -64,15 +68,29 @@ def collect(path):
     return refs
 
 
-def fetch_ids(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "claude-skills-anchor-check"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        parser = IdCollector()
-        parser.feed(resp.read().decode("utf-8", "replace"))
+def parse_ids(html):
+    parser = IdCollector()
+    parser.feed(html)
     return parser.ids
 
 
+def fetch_ids(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "claude-skills-anchor-check"})
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return parse_ids(resp.read().decode("utf-8", "replace"))
+
+
+def local_page(site, url):
+    """Map a published URL to its file in a MkDocs build (use_directory_urls)."""
+    rel = url[len(BASE):].split("?", 1)[0]
+    return site / rel / "index.html" if not rel or rel.endswith("/") else site / rel
+
+
 def main():
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--site", type=Path, help="local MkDocs build to check instead of the published site")
+    args = ap.parse_args()
+
     refs = {}
     for path in sorted(SKILLS_DIR.rglob("*.md")):
         for key, where in collect(path).items():
@@ -83,6 +101,14 @@ def main():
 
     pages, errors = {}, []
     for page in sorted({p for p, _ in refs}):
+        if args.site:
+            path = local_page(args.site, page)
+            if path.is_file():
+                pages[page] = parse_ids(path.read_text(encoding="utf-8", errors="replace"))
+            else:
+                pages[page] = None
+                errors.append(f"{page}: page missing in {args.site}")
+            continue
         try:
             pages[page] = fetch_ids(page)
         except urllib.error.HTTPError as e:

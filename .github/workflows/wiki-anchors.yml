@@ -1,7 +1,7 @@
 name: wiki-anchors
 
-# A heading renamed on wiki.jdelgado.fr breaks the anchors the wiki skills cite, without any commit here:
-# the weekly run catches those, the push run catches a bad citation added here.
+# The wiki CI blocks a heading rename that breaks a citation (check-anchors.py --site); the weekly run
+# is the backstop for the live site, the push run catches a bad citation added here.
 on:
   push:
     branches: [main]
