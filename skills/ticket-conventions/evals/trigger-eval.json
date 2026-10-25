@@ -1,0 +1,56 @@
+[
+    {
+        "query": "fais un ticket pour la migration des runners vers les nodes ARM, c'est pour le sprint prochain",
+        "should_trigger": true
+    },
+    {
+        "query": "commente le ticket PE-2387 avec ce qu'on a trouvé sur le store gateway",
+        "should_trigger": true
+    },
+    { "query": "poste ça sur PE-2501 stp", "should_trigger": true },
+    {
+        "query": "le ticket est prêt à tester, update-le",
+        "should_trigger": true
+    },
+    {
+        "query": "ouvre une issue sur le repo du chart pour le bug de la probe",
+        "should_trigger": true
+    },
+    {
+        "query": "réécris la description de la MR, elle raconte toute l'investigation",
+        "should_trigger": true
+    },
+    {
+        "query": "ouvre la MR, c'est le fix de la RR thanos",
+        "should_trigger": true
+    },
+    {
+        "query": "drafte le corps du ticket avant que je le crée, en anglais",
+        "should_trigger": true
+    },
+    {
+        "query": "c'est quoi la syntaxe jira-cli pour lister mes tickets du sprint en cours ?",
+        "should_trigger": false
+    },
+    { "query": "combien de SP pour PE-2612 ?", "should_trigger": false },
+    {
+        "query": "merge tout ce qui est vert sur PE-2450",
+        "should_trigger": false
+    },
+    {
+        "query": "lis le ticket PE-2387 et dis-moi où on en est",
+        "should_trigger": false
+    },
+    {
+        "query": "écris un article wiki sur le sizing du compactor thanos",
+        "should_trigger": false
+    },
+    {
+        "query": "réponds à la review de Julien sur la MR 88",
+        "should_trigger": false
+    },
+    {
+        "query": "rédige un message slack pour annoncer la maintenance de demain",
+        "should_trigger": false
+    }
+]
