@@ -6,7 +6,9 @@ description: >
   "fix ça et ouvre la MR après", "push et MR", "ajoute un commit à la MR", "update la MR".
   Covers the branch base, author identity, signed per-scope commits, rebase, creation, the
   description update and the URL handover. Org rules (labels, ticket key in the title) come
-  from the project CLAUDE.md. Not for merging, reviewing, or answering review threads.
+  from the project CLAUDE.md. Load ticket-conventions alongside it for the description text.
+  Not for merging (mr-batch-merge), reviewing an MR (platform-mr-review), or answering
+  review threads (addressing-gitlab-review-comments).
 ---
 
 # Open an MR
