@@ -76,6 +76,17 @@ More checks the source makes cheap:
 - **A Kubernetes recipe that runs privileged.** Ask which namespace it changes and whether a native path exists. A `sysctl -w` initContainer in a `hostNetwork` pod rewrites the node for every host-network process, since the kubelet rejects `net.*` sysctls there (`pkg/kubelet/sysctl/allowlist.go`). In a pod with its own netns, `securityContext.sysctls` does it unprivileged, safe or unsafe per `safe_sysctls.go`, and Pod Security `baseline` admits only the safe ones.
 - **A third-party bug described in the present tense.** Search upstream for a later fix (`git log --grep`, `git tag --contains`) and compare with the deployed version: Dragonfly emits its zero-valued eviction counters since v2.0.0 (PR #8052), while prod ran v1.37.
 
+## Freshness pass
+
+A claim true on the day the article was written can be false today. On the GitHub hardening article, 5 of about 25 corrections were changes that shipped in the 6 weeks after writing: a runner image going GA, a preview feature, a reworded validator message, an endpoint sunset, a renamed API host. Fact-checking against the source alone does not catch them unless the check starts from the article's date.
+
+1. Take the article's date: the front matter, else `git log --diff-filter=A --format=%ad -- <file>`.
+2. List every tool, platform and API the article cites.
+3. For each one, read what changed since that date: the releases (`gh api repos/<o>/<r>/releases --jq '.[] | select(.published_at > "<date>") | .tag_name'`, or `git tag --sort=-creatordate` in the local clone), the CHANGELOG, and for GitHub itself the [changelog](https://github.blog/changelog/) and deprecation notices. Skim titles, open only what touches a claim.
+4. Hunt the time-bound words: "en preview", "bientôt", "prévu", "annoncé", "aujourd'hui", "par défaut", a quoted error message, a date in the future.
+
+A changed fact goes in the report like any other, tagged OUTDATED with the date it changed, so the author sees it is not a writing mistake. CI and platform articles age fastest: run the pass on every re-read of those, not only on a new article.
+
 ## Try to break it, not to confirm it
 
 An agent asked to "verify this article" confirms the article. The posture that finds anything is the opposite: for each claim, actively hunt the counter-example, the missing condition, the version where it stopped being true.
@@ -99,6 +110,7 @@ A claim that could not be sourced is not validated. It goes out as IMPRECISE, no
 - **Filing something as a nuance when it changes what the reader does.** The rubric decides, not the impression.
 - **Quoting from memory.** A paraphrase inside quotation marks passes an invention off as a source.
 - **Stopping at the docs** for a default value or a metric name.
+- **Deriving a tool's output from its source when running it is cheap.** An agent rebuilt the `renovate-config-validator` message from `validation.ts` and quoted a warning, while the run prints an error first, and that error text is the one that stayed stable across versions. Run the tool, paste what it prints.
 - **Re-checking YAML and JSON fences**, already covered by the repo hook.
 - **Fixing on the spot.** The report goes to the author first: when a number comes from their own measurement, only they know which one is right.
 
