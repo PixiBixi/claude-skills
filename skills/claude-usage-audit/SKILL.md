@@ -1,6 +1,6 @@
 ---
 name: claude-usage-audit
-description: Use when asked to analyse Claude Code token usage or spend over a period ("analyse mon usage token", "combien j'ai consommé", "pourquoi je tape la limite", "audit tokens 30 jours"), or to re-measure after a cost change. Parses ~/.claude/projects transcripts locally, no API call.
+description: Use when asked to analyse Claude Code token usage or spend over a period ("analyse mon usage token", "combien j'ai consommé", "pourquoi je tape la limite", "audit tokens 30 jours"), or to re-measure after a cost change. Parses ~/.claude/projects transcripts locally, no API call. Not for API pricing or model choice (claude-api), or what Claude Code loads and how to configure it (claude-code-guide).
 ---
 
 # Claude usage audit
@@ -22,7 +22,7 @@ Window: `AUDIT_DAYS=90` in the environment (default 30, 90 for `history.py`). Tr
 
 ## Before quoting dollars
 
-Prices live in three tables: `PRICES` in `usage.py` and `history.py`, `P` in `cost_split.py`. Check them against the `claude-api` skill first and fix the table when a model is missing (an unknown model counts as $0).
+Prices live in one table, `PRICES` in `scripts/prices.py`. Check it against the `claude-api` skill first. A script that met a model missing from it prints a warning and exits 2: its totals undercount, so add the model and rerun before quoting a figure.
 
 ## What to look at, in order
 
