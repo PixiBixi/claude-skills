@@ -1,6 +1,6 @@
 ---
 name: reviewing-thanos-deployments
-description: Use when reviewing, writing or sizing a Thanos deployment (Helm values, manifests, component flags, alert rules, cache config) or diagnosing Thanos read path saturation - store gateway gate pinned, slow global queries, first query after idle endless, Receive OOM, compactor alerts that never or always fire, cache sizing for Redis, Memcached or Dragonfly.
+description: Use when reviewing, writing or sizing a Thanos deployment (Helm values, manifests, component flags, alert rules, cache config) or diagnosing Thanos read path saturation - store gateway gate pinned, slow global queries, first query after idle endless, Receive OOM, compactor alerts that never or always fire, cache sizing for Redis, Memcached or Dragonfly. Triggers - "on est en r=2 pour le storegateway, bizarre non ?", "c'est un enfer thanos, pourquoi on a ce manque de métrique ?", "on est en POST sur Thanos, le cache est OK avec ça ?", "revois les values Thanos". Not for dashboard or PromQL work on top of Thanos, or rightsizing one pod from its usage.
 ---
 
 # Reviewing Thanos deployments
