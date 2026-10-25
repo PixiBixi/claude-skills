@@ -1,6 +1,6 @@
 ---
 name: wiki-fact-check
-description: Use before committing a new or rewritten article on the PixiBixi wiki (repo pixibixi.github.io, docs/ tree), or when asked to verify, fact-check or audit the accuracy of an existing article. Triggers - "vérifie l'article", "fact-check", "revue d'exactitude", "est-ce que c'est juste", "relis avant commit", or once the build and the markdown lint pass in the pixibixi-wiki-article workflow.
+description: Use before committing a new or rewritten article on the PixiBixi wiki (repo pixibixi.github.io, docs/ tree), or when asked to verify, fact-check or audit the accuracy of an existing article. Triggers - "vérifie l'article", "fact-check", "revue d'exactitude", "est-ce que c'est juste", "relis avant commit", or once the build and the markdown lint pass in the pixibixi-wiki-article workflow. Not for writing or rewording an article (pixibixi-wiki-article) or for build and lint failures.
 ---
 
 # Fact-checking a wiki article
@@ -68,7 +68,7 @@ So for any claim in families 1, 3 and 4: **go read the source**, not just the do
 
 When docs and code disagree, code wins and the report flags the contradiction.
 
-Two more checks the source makes cheap:
+More checks the source makes cheap:
 
 - **Version.** A behaviour can be true for the version deployed and false for the reader's. Find when it changed (`git log -S` on the function, then `git tag --contains`) and flag a claim that does not date itself. Thanos receive RF=2 needed both replicas to ack until v0.37 (PR #7669), then a quorum of 1.
 - **Our own config.** A passage describing the author's setup (layers, flags, ApplicationSet shape) is checked against the current repo, not memory: the Thanos ApplicationSet had been rewritten since the article was drafted. Check the version actually running too (`kubectl get pods -o jsonpath` on the image), since a chart default can pin an older release than the repo suggests.
