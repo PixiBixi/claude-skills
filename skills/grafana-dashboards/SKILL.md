@@ -35,7 +35,7 @@ gcx config check || { echo "not ready: gcx login"; exit 1; }
 ```
 Call gcx and kubectl directly, never through a shell function, a variable or an `env` prefix (zsh breaks the first two, and permission rules and the auto mode classifier cannot match any of them).
 
-A PromQL range is `gcx metrics query -d <uid> '<expr>' --from <t> --to <t> --step 5m -o json`. A Tempo search spans 48h at most (`exceeds 48h0m0s`): walk a week day by day with `--from`/`--to`.
+Ad hoc PromQL goes through `thq` (`scripts/thq`, symlinked in `PATH`), never a `curl` wrapper or raw `gcx metrics query -o json`: it prints one line per series (min/avg/max + sparkline) and sets `dedup=true`, `partial_response=false` on Thanos. `thq r '<expr>' --since 6h`, `thq q`, `thq names|labels|values`, `thq stores`; `-c <gcx context>` (default current-context), `--ds <uid|name|alias>`. Aliases, per-context default datasources and the `--direct` URL come from `~/.config/thq/config.json` (`THQ_CONFIG`), never from the script. A Tempo search spans 48h at most (`exceeds 48h0m0s`): walk a week day by day with `--from`/`--to`.
 
 ## Which instance
 | Request | Pass |

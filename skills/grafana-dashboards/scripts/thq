@@ -1,0 +1,518 @@
+#!/usr/bin/env python3
+"""thq - token-efficient Thanos query client.
+
+Raw Prometheus/Thanos JSON is fatal to an agent's context: a single range query
+over a handful of series can be tens of thousands of tokens of datapoints. This
+wrapper collapses each series to one line (min/avg/max/first/last + sparkline),
+which is what you actually need to spot "this metric is too low".
+
+Two defaults here are deliberate and matter for correctness on this cluster:
+  * dedup=true          - receive_replica means every series exists twice.
+  * partial_response=false - with 46 stores, a silently-dropped store looks
+                          exactly like "the metric went down". We want an
+                          error instead of a plausible wrong answer.
+Any `warnings` returned by Thanos are always printed, never swallowed.
+
+On a plain Prometheus datasource neither parameter is sent and `stores` refuses.
+
+Transport: the Grafana datasource proxy through `gcx api`, so no tailnet is
+needed. Context: --context, else THQ_CONTEXT, else gcx's current-context.
+Datasource: --ds, else THQ_DS, else CONTEXT_DEFAULT_DS, else the context's
+`datasources.prometheus` in gcx config. --ds takes a uid, an ALIASES key or a
+datasource name. THQ_DIRECT=1 is the degraded mode: plain curl to THANOS_URL
+over the tailnet, for when Grafana itself is the thing that is broken.
+
+Forked from claude-code-marketplace grafana-observability 1.2.1 (63085ce).
+"""
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+import urllib.parse
+
+PARTIAL = ["false"]          # set once from --partial; api() applies it to every call
+CONTEXT = os.environ.get("THQ_CONTEXT")   # None: gcx current-context, resolved in main()
+DS = os.environ.get("THQ_DS")             # None: per-context default, resolved in main()
+
+
+def load_config():
+    """Site values stay out of this script: THQ_CONFIG, else ~/.config/thq/config.json,
+    {"aliases": {name: uid}, "context_default_ds": {ctx: uid}, "thanos_url": url}."""
+    path = os.environ.get("THQ_CONFIG") or os.path.expanduser("~/.config/thq/config.json")
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+    except (OSError, json.JSONDecodeError) as e:
+        sys.exit(f"thq: cannot read config {path}: {e}")
+
+
+_CFG = load_config()
+ALIASES = _CFG.get("aliases") or {}
+CONTEXT_DEFAULT_DS = _CFG.get("context_default_ds") or {}
+UID_RE = re.compile(r"[A-Za-z0-9_-]+")
+LABEL_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+DIRECT = os.environ.get("THQ_DIRECT") == "1"
+THANOS_URL = os.environ.get("THANOS_URL") or _CFG.get("thanos_url")
+IS_THANOS = [True]           # set by resolve_ds(); False drops dedup/partial_response
+BASE = THANOS_URL
+SPARK = "▁▂▃▄▅▆▇█"
+
+
+def parse_duration(s):
+    """'6h' -> 21600 seconds. Accepts s/m/h/d/w."""
+    units = {"s": 1, "m": 60, "h": 3600, "d": 86400, "w": 604800}
+    s = s.strip()
+    if s and s[-1] in units:
+        return int(float(s[:-1]) * units[s[-1]])
+    return int(float(s))
+
+
+def set_direct():
+    global DIRECT, BASE
+    DIRECT, BASE = True, THANOS_URL
+
+
+def gcx_config():
+    """gcx config as a dict; {} when gcx is missing or prints no JSON."""
+    try:
+        proc = subprocess.run(["gcx", "config", "view", "-o", "json"],
+                              capture_output=True, text=True, timeout=20)
+        return json.loads(proc.stdout or "{}")
+    except (FileNotFoundError, subprocess.TimeoutExpired, json.JSONDecodeError):
+        return {}
+
+
+def resolve_context(cli_ctx):
+    global CONTEXT
+    cfg = gcx_config()
+    CONTEXT = cli_ctx or CONTEXT or cfg.get("current-context")
+    if not CONTEXT:
+        sys.exit("thq: no gcx context: pass --context or run `gcx config use-context <name>`")
+    contexts = cfg.get("contexts") or {}
+    if contexts and CONTEXT not in contexts:
+        sys.exit(f"thq: unknown gcx context {CONTEXT!r}, known: {', '.join(sorted(contexts))}")
+    return (contexts.get(CONTEXT) or {}).get("datasources", {}).get("prometheus")
+
+
+def ds_lookup(path, timeout):
+    """Datasource JSON for /api/datasources/{uid|name}/..., or (None, why)."""
+    try:
+        proc = subprocess.run(["gcx", "--context", CONTEXT, "api", "-o", "json", path],
+                              capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return None, f"lookup timed out after {timeout}s"
+    except FileNotFoundError:
+        return None, "gcx not found in PATH"
+    try:
+        body = decode(proc.stdout)
+    except json.JSONDecodeError:
+        return None, f"non-JSON lookup reply: {proc.stdout.strip()[:200]}"
+    if not isinstance(body, dict):
+        return None, f"no lookup reply (exit {proc.returncode}): {proc.stderr.strip()[:200]}"
+    if body.get("status") == "error" or "uid" not in body:
+        return None, str(body.get("error") or body.get("message") or body)[:300]
+    return body, None
+
+
+def resolve_ds(ref, cmd, timeout):
+    """Pin DS to a uid and IS_THANOS to the datasource's prometheusType.
+    dedup and partial_response=false only mean something to Thanos."""
+    global DS, BASE
+    ref = ALIASES.get(ref, ref)
+    body, why = (ds_lookup(f"/api/datasources/uid/{ref}", timeout) if UID_RE.fullmatch(ref)
+                 else (None, "not a uid"))
+    if body is None:
+        body, why2 = ds_lookup(f"/api/datasources/name/{urllib.parse.quote(ref, safe='')}", timeout)
+        if body is None:
+            sys.exit(f"thq: datasource {ref!r} not found on context {CONTEXT} "
+                     f"(by uid: {why}; by name: {why2}). Aliases: {', '.join(ALIASES)}")
+    if body.get("type") != "prometheus":
+        sys.exit(f"thq: datasource {ref!r} is {body.get('type')!r}, not Prometheus-compatible")
+    DS, BASE = body["uid"], f"{CONTEXT}/datasources/{body['uid']}"
+    IS_THANOS[0] = (body.get("jsonData") or {}).get("prometheusType") == "Thanos"
+    if cmd == "stores" and not IS_THANOS[0]:
+        sys.exit(f"thq: stores needs a Thanos datasource; {body.get('name')} ({DS}) is not")
+
+
+def build_cmd(path, params, timeout):
+    """The command for one API call, on either transport."""
+    if DIRECT:
+        # curl, not urllib: the internal CA lives in the macOS keychain, which
+        # curl honours and Python's bundled trust store does not.
+        cmd = ["curl", "-sS", "--fail-with-body", "--max-time", str(timeout), "-G",
+               f"{THANOS_URL}/api/v1/{path}"]
+        for k, v in params.items():
+            for item in v if isinstance(v, (list, tuple)) else [v]:
+                cmd += ["--data-urlencode", f"{k}={item}"]
+        return cmd
+    qs = urllib.parse.urlencode(params, doseq=True)
+    return ["gcx", "--context", CONTEXT, "api", "-o", "json",
+            f"/api/datasources/proxy/uid/{DS}/api/v1/{path}" + (f"?{qs}" if qs else "")]
+
+
+def decode(raw):
+    """Prometheus JSON from either transport. gcx prefixes hint lines and wraps
+    upstream failures in a gcx.error whose details carry the upstream body."""
+    txt = "\n".join(l for l in raw.splitlines() if '"class":"hint"' not in l).strip()
+    if not txt:
+        return None
+    body = json.loads(txt)
+    if isinstance(body, dict) and body.get("type") == "gcx.error":
+        err = body.get("error") or {}
+        details = err.get("details", "")
+        try:
+            upstream = json.loads(details)
+            if isinstance(upstream, dict) and ("error" in upstream or "status" in upstream):
+                return upstream
+        except (TypeError, ValueError):
+            pass
+        return {"status": "error", "error": f"{err.get('summary', 'gcx error')}: {details}"[:600]}
+    return body
+
+
+def api(path, params, timeout):
+    params = dict(params)
+    if IS_THANOS[0]:
+        params.setdefault("dedup", "true")
+        # Every endpoint: `values` enumerates the label vocabulary, and a partial
+        # response there silently shortens it.
+        params.setdefault("partial_response", PARTIAL[0])
+    cmd = build_cmd(path, params, timeout)
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 15)
+    except subprocess.TimeoutExpired:
+        sys.exit(f"thq: no answer from {BASE} within {timeout}s")
+    except FileNotFoundError:
+        sys.exit(f"thq: {cmd[0]} not found in PATH.")
+    try:
+        body = decode(proc.stdout)
+    except json.JSONDecodeError:
+        sys.exit(f"thq: non-JSON response from {BASE} (exit {proc.returncode}): {proc.stdout.strip()[:400]}")
+    if body is None:
+        sys.exit(f"thq: no response from {BASE} (exit {proc.returncode}): {proc.stderr.strip()[:400]}")
+
+    if body.get("status") != "success":
+        sys.exit(f"thq: query error: {body.get('error', body)}")
+    for w in body.get("warnings") or []:
+        print(f"!! THANOS WARNING: {w}", file=sys.stderr)
+    return body["data"]
+
+
+def fmt_num(v):
+    """Compact but honest: 3 significant digits with an SI suffix."""
+    if v is None:
+        return "-"
+    a = abs(v)
+    if a != 0 and a < 0.001:
+        return f"{v:.2e}"
+    for div, suf in ((1e12, "T"), (1e9, "G"), (1e6, "M"), (1e3, "k")):
+        if a >= div:
+            return f"{v / div:.3g}{suf}"
+    return f"{v:.4g}"
+
+
+def fmt_labels(metric, full, keep=None):
+    m = {k: v for k, v in metric.items() if k != "__name__"}
+    name = metric.get("__name__", "")
+    if keep:
+        m = {k: v for k, v in m.items() if k in keep}
+    elif not full:
+        # Replica/tenant plumbing is noise once dedup is on.
+        for noise in ("receive", "receive_replica", "tenant_id", "prometheus", "prometheus_replica"):
+            m.pop(noise, None)
+    inner = ",".join(f"{k}={v}" for k, v in sorted(m.items()))
+    if not full and len(inner) > 160:
+        inner = inner[:157] + "..."
+    return f"{name}{{{inner}}}" if inner else (name or "{}")
+
+
+def sparkline(vals):
+    nums = [v for v in vals if v is not None]
+    if not nums:
+        return ""
+    lo, hi = min(nums), max(nums)
+    span = hi - lo
+    out = []
+    for v in vals:
+        if v is None:
+            out.append(" ")
+        elif span == 0:
+            out.append(SPARK[3])
+        else:
+            out.append(SPARK[min(7, int((v - lo) / span * 7.999))])
+    return "".join(out)
+
+
+def series_stats(pairs):
+    vals = []
+    for _, raw in pairs:
+        try:
+            f = float(raw)
+        except (TypeError, ValueError):
+            f = None
+        vals.append(None if f is None or f != f else f)  # drop NaN
+    real = [v for v in vals if v is not None]
+    if not real:
+        return None
+    return {
+        "min": min(real),
+        "max": max(real),
+        "avg": sum(real) / len(real),
+        "first": real[0],
+        "last": real[-1],
+        "n": len(real),
+        "gaps": len(vals) - len(real),
+        "spark": sparkline(vals),
+    }
+
+
+def emit_instant(result, args):
+    rows = []
+    for s in result:
+        try:
+            v = float(s["value"][1])
+        except (TypeError, ValueError, KeyError):
+            continue
+        if v != v:
+            continue
+        rows.append((v, fmt_labels(s["metric"], args.full_labels, args.only)))
+    rows.sort(key=lambda r: abs(r[0]), reverse=True)
+    print(f"# {len(rows)} series (instant)")
+    for v, lbl in rows[: args.top]:
+        print(f"{fmt_num(v):>12}  {lbl}")
+    if len(rows) > args.top:
+        print(f"# ... {len(rows) - args.top} more series suppressed (--top {len(rows)} to see all)")
+
+
+def emit_range(result, args):
+    rows = []
+    for s in result:
+        st = series_stats(s.get("values") or [])
+        if st:
+            rows.append((st, fmt_labels(s["metric"], args.full_labels, args.only)))
+    rows.sort(key=lambda r: abs(r[0]["avg"]), reverse=True)
+    print(f"# {len(rows)} series (range)  cols: last | min | avg | max | first->last %")
+    for st, lbl in rows[: args.top]:
+        delta = ""
+        if st["first"] == 0:
+            # Distinct from no data: an empty column would read as "no change".
+            delta = "new" if st["last"] else ""
+        elif st["first"]:
+            delta = f"{(st['last'] - st['first']) / abs(st['first']) * 100:+.0f}%"
+        gaps = f" gaps={st['gaps']}" if st["gaps"] else ""
+        print(
+            f"{fmt_num(st['last']):>11} |{fmt_num(st['min']):>10} |{fmt_num(st['avg']):>10} |"
+            f"{fmt_num(st['max']):>10} |{delta:>6}  {st['spark']}{gaps}  {lbl}"
+        )
+    if len(rows) > args.top:
+        print(f"# ... {len(rows) - args.top} more series suppressed (--top {len(rows)} to see all)")
+
+
+def time_window(args):
+    end = time.time() if args.end == "now" else float(args.end)
+    return end - parse_duration(args.since), end
+
+
+def main():
+    # Shared flags are attached to BOTH the root parser and every subparser so
+    # they work on either side of the subcommand. default=SUPPRESS is required:
+    # a real default on a subparser would clobber a value already set by root.
+    common = argparse.ArgumentParser(add_help=False, argument_default=argparse.SUPPRESS)
+    common.add_argument("--since", help="lookback window for discovery/range (default 1h)")
+    common.add_argument("--end", help="unix ts or 'now'")
+    common.add_argument("--step", help="range step, e.g. 5m (default: window/48)")
+    common.add_argument("--frozen-after", type=float, metavar="H",
+                        help="stores flag as TIME-FROZEN when maxTime is this many "
+                             "hours in the past (default: 6)")
+    common.add_argument("--top", type=int, help="max series to print (default 25)")
+    common.add_argument("--only", nargs="*", help="show only these label keys")
+    common.add_argument("--full-labels", action="store_true", help="do not trim/hide labels")
+    common.add_argument("--partial", action="store_true", help="allow partial responses (DANGEROUS: hides missing stores)")
+    common.add_argument("--timeout", type=int, help="per-request timeout seconds (default 180)")
+    common.add_argument("--raw", action="store_true", help="dump raw JSON instead")
+    common.add_argument("-c", "--context", metavar="CTX",
+                        help="gcx context (default: THQ_CONTEXT, else gcx current-context)")
+    common.add_argument("--ds", metavar="UID|ALIAS|NAME",
+                        help=f"Prometheus-compatible datasource; aliases: {', '.join(ALIASES)} "
+                             "(default: THQ_DS, else the context's default)")
+    common.add_argument("--direct", action="store_true",
+                        help="degraded mode: curl THANOS_URL over the tailnet, bypassing Grafana Cloud")
+    defaults = {"since": "1h", "end": "now", "step": None, "top": 25, "only": None,
+                "full_labels": False, "partial": False, "timeout": 180, "raw": False,
+                "frozen_after": 6, "direct": False, "ds": None, "context": None}
+    # argument_default=SUPPRESS withholds values, so every shared flag needs one
+    # here or subcommands get an AttributeError. Fail at startup, not mid-run.
+    _shared = {a.dest for a in common._actions if a.dest != "help"}
+    assert _shared == set(defaults), (
+        f"thq: shared flags and defaults disagree: "
+        f"missing={_shared - set(defaults)} extra={set(defaults) - _shared}")
+
+    p = argparse.ArgumentParser(prog="thq", parents=[common],
+                                description="Token-efficient Thanos/Prometheus query client over gcx")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    q = sub.add_parser("q", parents=[common], help="instant query")
+    q.add_argument("promql")
+    r = sub.add_parser("r", parents=[common], help="range query, summarized one line per series")
+    r.add_argument("promql")
+    n = sub.add_parser("names", parents=[common], help="metric names matching a regex")
+    n.add_argument("regex")
+    lb = sub.add_parser("labels", parents=[common], help="label keys present for a selector")
+    lb.add_argument("selector")
+    va = sub.add_parser("values", parents=[common], help="values of a label, optionally within a selector")
+    va.add_argument("label")
+    va.add_argument("selector", nargs="?")
+    sub.add_parser("ping", parents=[common],
+                   help="does the datasource answer through Grafana? (replaces a raw curl)")
+    se = sub.add_parser("series", parents=[common], help="series matching a selector")
+    se.add_argument("selector")
+    sub.add_parser("stores", parents=[common], help="store topology health summary")
+
+    args = p.parse_args()
+    for k, v in defaults.items():
+        if not hasattr(args, k):
+            setattr(args, k, v)
+    PARTIAL[0] = "true" if args.partial else "false"
+    if (args.direct or DIRECT) and (args.ds or args.context):
+        p.error("--ds/--context pick a Grafana datasource; --direct / THQ_DIRECT=1 bypasses Grafana. Use one")
+    if args.direct:
+        set_direct()
+    if DIRECT and not THANOS_URL:
+        p.error("--direct needs THANOS_URL, or thanos_url in the thq config")
+    if args.cmd == "values" and not LABEL_RE.fullmatch(args.label):
+        p.error(f"label name must match [A-Za-z_][A-Za-z0-9_]*, got {args.label!r}")
+    if not DIRECT:
+        gcx_default = resolve_context(args.context)
+        ref = args.ds or DS or CONTEXT_DEFAULT_DS.get(CONTEXT) or gcx_default
+        if not ref:
+            p.error(f"no datasource for context {CONTEXT}: pass --ds or set THQ_DS")
+        resolve_ds(ref, args.cmd, args.timeout)
+    pr = {}   # api() now applies partial_response to every endpoint
+
+    if args.cmd == "ping":
+        # Same check as a raw curl, but curl sits in the allowlist's `ask` by
+        # design, so a raw probe prompts on every investigation.
+        t0 = time.time()
+        try:
+            api("status/buildinfo", {}, args.timeout)
+        except SystemExit as e:
+            print(f"UNREACHABLE {BASE}\n  {e}")
+            if DIRECT:
+                print("  Degraded mode (--direct): connect Tailscale in the Tailscale app, then re-run.")
+            else:
+                print(f"  Check the gcx context: gcx --context {CONTEXT} config check")
+            raise SystemExit(1)
+        kind = "thanos" if IS_THANOS[0] else "prometheus"
+        print(f"reachable  {BASE}  {kind}  ({(time.time()-t0)*1000:.0f}ms)")
+        return
+
+    if args.cmd == "stores":
+        data = api("stores", {}, args.timeout)
+        now_ms = time.time() * 1000
+        # A store can answer while its data stops moving: no lastError, maxTime
+        # pinned in the past.
+        frozen_after_ms = args.frozen_after * 3600 * 1000
+        for kind, entries in data.items():
+            print(f"# {kind}: {len(entries)} endpoints")
+            unreachable = [e for e in entries if e.get("lastError")]
+            for e in unreachable:
+                print(f"  UNREACHABLE {e['name']}: {e['lastError']}")
+            frozen = []
+            for e in entries:
+                if e.get("lastError"):
+                    continue
+                mx = e.get("maxTime")
+                # Live stores carry a far-future sentinel maxTime.
+                if isinstance(mx, (int, float)) and 0 < mx < now_ms - frozen_after_ms:
+                    frozen.append((e, mx))
+            for e, mx in frozen:
+                age_h = (now_ms - mx) / 3600000
+                print(f"  TIME-FROZEN {e['name']}: maxTime "
+                      f"{time.strftime('%Y-%m-%d %H:%M', time.gmtime(mx/1000))} UTC "
+                      f"({age_h:.0f}h ago), reachable but ingesting nothing")
+            healthy = len(entries) - len(unreachable) - len(frozen)
+            print(f"  healthy={healthy} unreachable={len(unreachable)} frozen={len(frozen)}")
+
+            # Two distinct ingestion paths coexist per datacenter; keep them
+            # apart, because conflating them double-counts or hides series.
+            filtered, bare, dcs = set(), set(), set()
+            for e in entries:
+                for ls in e.get("labelSets") or []:
+                    rp = ls.get("receive_prometheus")
+                    if rp:
+                        (filtered if rp.endswith("-prom-platform-filtered") else bare).add(rp)
+                    if ls.get("dc"):
+                        dcs.add(f"{ls['dc']}/{ls.get('prom_env', '?')}")
+            if filtered:
+                print(f"  platform-filtered sources ({len(filtered)}): {', '.join(sorted(filtered))}")
+            if bare:
+                print(f"  bare dc-receive sources ({len(bare)}): {', '.join(sorted(bare))}")
+            if dcs:
+                print(f"  dc/prom_env labelsets ({len(dcs)}): {', '.join(sorted(dcs))}")
+        return
+
+    if args.cmd == "q":
+        params = {"query": args.promql, **pr}
+        if args.end != "now":
+            params["time"] = args.end
+        data = api("query", params, args.timeout)
+        if args.raw:
+            print(json.dumps(data)); return
+        if data["resultType"] == "scalar":
+            print(fmt_num(float(data["result"][1]))); return
+        emit_instant(data["result"], args)
+        return
+
+    if args.cmd == "r":
+        start, end = time_window(args)
+        step = args.step or f"{max(15, int((end - start) / 48))}s"
+        data = api("query_range", {"query": args.promql, "start": start, "end": end, "step": step, **pr}, args.timeout)
+        if args.raw:
+            print(json.dumps(data)); return
+        print(f"# window={args.since} step={step}")
+        emit_range(data["result"], args)
+        return
+
+    start, end = time_window(args)
+    win = {"start": start, "end": end}
+
+    if args.cmd == "names":
+        data = api("label/__name__/values", win, args.timeout)
+        rx = re.compile(args.regex)
+        hits = [m for m in data if rx.search(m)]
+        print(f"# {len(hits)} metric names match /{args.regex}/ (of {len(data)} in {args.since})")
+        for m in hits[: args.top]:
+            print(m)
+        if len(hits) > args.top:
+            print(f"# ... {len(hits) - args.top} more (--top N)")
+    elif args.cmd == "labels":
+        data = api("labels", {**win, "match[]": args.selector}, args.timeout)
+        print(f"# {len(data)} label keys for {args.selector}")
+        print("\n".join(data))
+    elif args.cmd == "values":
+        prm = dict(win)
+        if args.selector:
+            prm["match[]"] = args.selector
+        data = api(f"label/{urllib.parse.quote(args.label, safe='')}/values", prm, args.timeout)
+        print(f"# {len(data)} values of '{args.label}'" + (f" within {args.selector}" if args.selector else ""))
+        for v in data[: args.top]:
+            print(v)
+        if len(data) > args.top:
+            print(f"# ... {len(data) - args.top} more (--top N)")
+    elif args.cmd == "series":
+        data = api("series", {**win, "match[]": args.selector}, args.timeout)
+        print(f"# {len(data)} series for {args.selector}")
+        for s in data[: args.top]:
+            print(fmt_labels(s, args.full_labels, args.only))
+        if len(data) > args.top:
+            print(f"# ... {len(data) - args.top} more (--top N)")
+
+
+if __name__ == "__main__":
+    main()
