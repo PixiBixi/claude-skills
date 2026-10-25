@@ -1,6 +1,6 @@
 ---
 name: pixibixi-wiki-article
-description: Use when writing, adding, updating, cross-linking, or adding a diagram to an article on the PixiBixi wiki (repo pixibixi.github.io, served at wiki.jdelgado.fr, MkDocs Material, docs/ tree). Triggers - "écris/ajoute un article wiki", "documente X sur le wiki", "ajoute une page", "rajoute un schéma à la page", "link entre deux articles du wiki".
+description: Use when writing, adding, updating, cross-linking, or adding a diagram to an article on the PixiBixi wiki (repo pixibixi.github.io, served at wiki.jdelgado.fr, MkDocs Material, docs/ tree). Triggers - "écris/ajoute un article wiki", "documente X sur le wiki", "ajoute une page", "rajoute un schéma à la page", "link entre deux articles du wiki". Not for checking an article's accuracy (wiki-fact-check) or docs outside the wiki repo.
 ---
 
 # Écrire un article sur le wiki PixiBixi
