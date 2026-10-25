@@ -1,6 +1,7 @@
 ---
 name: rss-digest
 description: Use when asked to catch up on the RSS backlog at summary.jdelgado.fr (FreshRSS Summary) - "ouvre summary.jdelgado.fr", "fais-moi le digest RSS", "j'ai du retard sur mes flux", "les 30 derniers jours", "qu'est-ce que j'ai raté". Fetches unread articles through the site API and re-ranks them against the platform/SRE profile instead of trusting the site score.
+disable-model-invocation: true
 ---
 
 # RSS digest
