@@ -20,8 +20,9 @@ In the module's local clone (fetch, never check out the user's branch):
 ```bash
 M=~/path/to/module-clone
 git -C "$M" fetch origin --tags
+B=$(git -C "$M" symbolic-ref --short refs/remotes/origin/HEAD)   # origin/main, origin/master...
 git -C "$M" tag --sort=-v:refname | head -3      # the existing scheme: bare X.Y.Z or vX.Y.Z
-git -C "$M" log --oneline -5 origin/main
+git -C "$M" log --oneline -5 "$B"
 ```
 
 | Change since the last tag | Bump |
@@ -33,20 +34,22 @@ git -C "$M" log --oneline -5 origin/main
 Follow the existing tag scheme exactly. Message: subject = the change in one line with the ticket key; body = what callers see, and whether bumping plans no change. Signed through `tag.gpgsign`:
 
 ```bash
-git -C "$M" tag -a 16.3.0 origin/main -F "$MSG"
-git -C "$M" tag -v 16.3.0
-git -C "$M" push origin 16.3.0
+VERSION=16.3.0                                   # the version chosen above, in the existing scheme
+git -C "$M" tag -a "$VERSION" "$B" -F "$MSG"
+git -C "$M" tag -v "$VERSION"
+git -C "$M" push origin "$VERSION"
 ```
 
-Confirm `origin/main` is the merge commit of the MR before tagging. Show the tag name and message and wait for a yes: a pushed tag is consumed immediately and is never re-pointed.
+Confirm `$B` is the merge commit of the MR before tagging. Show the tag name and message and wait for a yes: a pushed tag is consumed immediately and is never re-pointed.
 
 ## 2. Find every caller
 
 On the fetched default branch of each live repo, not the working tree (a stale checkout shows old refs):
 
 ```bash
-git -C <live-repo> fetch origin
-git -C <live-repo> grep -n '<module-name>.git' origin/main -- '*.hcl' '*.tf'
+L=~/path/to/live-repo
+git -C "$L" fetch origin
+git -C "$L" grep -n '<module-name>.git' "$(git -C "$L" symbolic-ref --short refs/remotes/origin/HEAD)" -- '*.hcl' '*.tf'
 ```
 
 List callers in a table: repo, file, current ref. A caller more than one major behind gets its own decision, never a silent multi-major jump.
@@ -61,9 +64,9 @@ List callers in a table: repo, file, current ref. A caller more than one major b
 
 | Mistake | Instead |
 |---|---|
-| Tagging the feature branch head or local `main` | `origin/main` after fetch, the merge commit |
+| Tagging the feature branch head or local `main` | The fetched default branch (`origin/HEAD`), the merge commit |
 | Changing the tag scheme (`v` prefix or not) | Copy the existing tags |
 | Lightweight or unsigned tag | `git tag -a`, verify with `git tag -v` |
 | Minor bump for a removed input | Major |
-| Grepping the working tree of a live repo | `git grep` on `origin/main` |
+| Grepping the working tree of a live repo | `git grep` on the fetched default branch |
 | Bumping and changing inputs in one commit | Two commits |
