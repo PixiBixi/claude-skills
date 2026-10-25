@@ -1,10 +1,10 @@
 # Optimising a site whose design is kept
 
-Rounds 1 to 3 of the interview are already answered: skip them.
+Rounds 1 to 4 of the interview are already answered: skip them.
 
 ## Round 0, measured
 
-Payload sizes (compressed), DOM node count, eager rendering (offscreen sections, autoplaying loops), external dependencies (fonts, CDNs, trackers), cache headers (hashed assets `immutable`, HTML short-lived). Read minification and fingerprinting from the built HTML and files, not from the config: an MkDocs site had `minify_css: true` and shipped every own stylesheet unminified, because `css_files` was empty. Run `scripts/sitemap-inventory.py` on the live site so the plan covers every template, not just the home page.
+Payload sizes (compressed), DOM node count, eager rendering (offscreen sections, autoplaying loops), external dependencies (fonts, CDNs, trackers), cache headers (hashed assets `immutable`, HTML short-lived). Read minification and fingerprinting from the built HTML and files, not from the config: an MkDocs site had `minify_css: true` and shipped every own stylesheet unminified, because `css_files` was empty. Run `${CLAUDE_SKILL_DIR}/scripts/sitemap-inventory.py` on the live site so the plan covers every template, not just the home page.
 
 Field data first: real-user p75 from CrUX tells whether visitors suffer before any lab run says why. The keyless quota is shared and answers 429, so pass `key=` (a Google Cloud API key) or read pagespeed.web.dev; a low-traffic site has no CrUX record, say so and rely on the lab.
 
