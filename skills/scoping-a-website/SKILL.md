@@ -1,6 +1,7 @@
 ---
 name: scoping-a-website
-description: Scoping and design direction for a website before any design or code is written, including the static vs SSG vs SPA call and a performance pass on a site whose design is kept. Use when the user asks to create, redesign, rebuild or restyle a website, landing page, portfolio, showcase site or web front end, asks for a design proposal for a site URL ("propose-moi un design" plus a link), asks whether something should be a SPA, is tired of their site's design ("refais mon site", "j'en ai marre du design", "fais-moi des maquettes", "surprends-moi"), or wants an existing site faster or better on mobile ("le site rame", "c'est lent sur mobile", "Lighthouse"). Not for a one-off HTML page or report to share (artifact-design), a single CSS bug, backend latency, or benchmarking third-party sites the user will not change.
+description: >-
+  Use before designing or coding a website: create, redesign or restyle a site, landing page or portfolio, a design proposal for a URL, static vs SSG vs SPA, or making a site faster on mobile ("refais mon site", "fais-moi des maquettes", "le site rame", "Lighthouse"). Not for a one-off HTML page to share (artifact-design).
 ---
 
 # Scoping a website

@@ -1,6 +1,7 @@
 ---
 name: charting-grafana-metrics
-description: Use when you need a clean PNG chart of Grafana/Prometheus metrics, comparing series (versions, canary vs control, before/after), attaching a graph to a Jira ticket or MR that no existing panel already shows, or when `gcx dashboards snapshot` fails on a self-hosted Grafana without the Image Renderer. Triggers - "fais-moi un graphe de X pour le ticket", "compare la v1 et la v2 sur un graph", "mets une courbe avant/après dans la MR", "un PNG de la métrique". Not for a screenshot of an existing panel on Grafana Cloud (`gcx dashboards snapshot`) or building or editing a dashboard (grafana-dashboards).
+description: >-
+  Use when a PNG chart of Prometheus/Grafana metrics is needed for a ticket or MR and no panel shows it: before/after, v1 vs v2, canary vs control, "fais-moi un graphe de X pour le ticket", or when `gcx dashboards snapshot` fails on a self-hosted Grafana. Not for building a dashboard (grafana-dashboards).
 ---
 
 # Charting Grafana metrics

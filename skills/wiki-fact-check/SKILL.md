@@ -1,6 +1,7 @@
 ---
 name: wiki-fact-check
-description: Use before committing a new or rewritten article on the PixiBixi wiki (repo pixibixi.github.io, docs/ tree), or when asked to verify, fact-check or audit the accuracy of an existing article. Triggers - "vérifie l'article", "fact-check", "revue d'exactitude", "est-ce que c'est juste", "relis avant commit", or once the build and the markdown lint pass in the pixibixi-wiki-article workflow. Not for writing or rewording an article (pixibixi-wiki-article) or for build and lint failures.
+description: >-
+  Use before committing a new or rewritten PixiBixi wiki article, or when asked to verify an existing one: "vérifie l'article", "fact-check", "est-ce que c'est juste", "relis avant commit". Not for writing or rewording (pixibixi-wiki-article).
 ---
 
 # Fact-checking a wiki article

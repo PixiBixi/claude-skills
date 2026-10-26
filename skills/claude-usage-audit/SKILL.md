@@ -1,6 +1,7 @@
 ---
 name: claude-usage-audit
-description: Use when asked to analyse Claude Code token usage or spend over a period ("analyse mon usage token", "combien j'ai consommé", "pourquoi je tape la limite", "audit tokens 30 jours"), or to re-measure after a cost change. Parses ~/.claude/projects transcripts locally, no API call. Not for API pricing or model choice (claude-api), or what Claude Code loads and how to configure it (claude-code-guide).
+description: >-
+  Use when asked to analyse Claude Code token usage or spend over a period, or to re-measure after a cost change: "analyse mon usage token", "combien j'ai consommé", "pourquoi je tape la limite". Not for API pricing or model choice (claude-api).
 ---
 
 # Claude usage audit

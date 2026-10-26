@@ -1,12 +1,7 @@
 ---
 name: k8s-rightsizing
-description: >
-  Use when sizing the CPU/memory requests or limits of a Kubernetes workload from its real
-  usage: "on peut réduire cette RAM ?", "rightsize X", "mesure sur 1 semaine", "combien
-  consomme <workload>", "il a déjà été OOMKilled ?", "baisse les requests", a FinOps cut on a
-  deployment or statefulset. Covers finding the series that hold the usage, the PromQL per
-  signal, the recommendation rule and the values change. Not for CI runner or node pool
-  sizing, or a live OOM incident.
+description: >-
+  Use when sizing CPU/memory requests or limits of a Kubernetes workload from its real usage: "on peut réduire cette RAM ?", "rightsize X", "combien consomme <workload>", "il a déjà été OOMKilled ?", "baisse les requests", a FinOps cut. Not for CI runners, node pools or a live OOM incident.
 ---
 
 # K8s rightsizing

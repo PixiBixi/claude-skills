@@ -1,12 +1,7 @@
 ---
 name: tf-module-release
-description: >
-  Use right after a Terraform module MR is merged and the new version must be tagged and
-  rolled into its callers: "fais le tag & bump module.hcl", "tag une nouvelle version",
-  "bump le module dans <repo>", "release le module", "<n> est merge, tag", "bump <module>
-  to X". Covers the semver choice, the signed annotated tag, finding every caller on the
-  default branch of the live repos, and the bump MRs. Not for writing the module change,
-  app repos versioned by a release tool, or Helm chart releases.
+description: >-
+  Use right after a Terraform module MR is merged, to tag the new version and bump its callers: "fais le tag & bump module.hcl", "tag une nouvelle version", "bump le module dans <repo>", "release le module", "<n> est merge, tag". Not for Helm chart releases.
 ---
 
 # Terraform module release

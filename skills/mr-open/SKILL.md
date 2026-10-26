@@ -1,14 +1,7 @@
 ---
 name: mr-open
-description: >
-  Use when committing work and opening or updating a GitLab MR or GitHub PR from the current
-  repo: "fais la MR", "ouvre la MR", "commit & push", "fais des commits propres et push",
-  "fix ça et ouvre la MR après", "push et MR", "ajoute un commit à la MR", "update la MR".
-  Covers the branch base, author identity, signed per-scope commits, rebase, creation, the
-  description update and the URL handover. Org rules (labels, ticket key in the title) come
-  from the project CLAUDE.md. Load ticket-conventions alongside it for the description text.
-  Not for merging (mr-batch-merge), reviewing an MR (platform-mr-review), or answering
-  review threads (addressing-gitlab-review-comments).
+description: >-
+  Use when committing work and opening or updating a GitLab MR or GitHub PR: "fais la MR", "ouvre la MR", "commit & push", "push et MR", "ajoute un commit à la MR", "update la MR". Load ticket-conventions with it for the description. Not for merging (mr-batch-merge) or review threads (addressing-gitlab-review-comments).
 ---
 
 # Open an MR

@@ -1,6 +1,7 @@
 ---
 name: grafana-cloud-monitoring
-description: Use when a Grafana panel queries Google Cloud Monitoring (the cloud-monitoring datasource, plugin type stackdriver), in PromQL or native MQL mode, or when migrating panels off a stackdriver-exporter onto it. Covers a GCM panel in No data or 403, converting a Cloud Monitoring or GMP metric type to its PromQL name, quota metrics that read empty, and template variables on a GCM datasource. Triggers - "la datasource GCM a pas de data", "ils sont dans google cloud monitoring, va check", "check si des dashboards utilisent des métriques stackdriver", "migre le panel du stackdriver_exporter". Not for Prometheus or Thanos panels and general dashboard work (grafana-dashboards), or the alert rule itself (equativ-add-alert).
+description: >-
+  Use when a Grafana panel queries Google Cloud Monitoring (stackdriver datasource, PromQL or MQL): No data or 403 on a GCM panel, GCM/GMP metric name to PromQL, empty quota metrics, migrating off stackdriver-exporter ("la datasource GCM a pas de data"). Not for Prometheus or Thanos panels (grafana-dashboards).
 ---
 
 # Grafana on Google Cloud Monitoring (GCM)

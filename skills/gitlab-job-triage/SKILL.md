@@ -1,13 +1,7 @@
 ---
 name: gitlab-job-triage
-description: >
-  Use when the user pastes a GitLab job, pipeline or MR-pipeline URL (.../-/jobs/<id>,
-  .../-/pipelines/<id>), often with nothing else or with "pourquoi ça a fail ?", "c'est quoi
-  cette erreur ?", "wtf ce plan", "lis le plan il est chelou", "check moi le plan", "le job
-  est rouge". Covers resolving the URL, pulling the log to a file, finding the first real
-  error, and reading a Terraform/Terragrunt plan critically (destroys, replacements,
-  unexpected units). Read-only. Not for checking a rollout after a merge (post-merge-verify)
-  or for reviewing the MR diff itself (platform-mr-review).
+description: >-
+  Use when the user pastes a GitLab job or pipeline URL (.../-/jobs/<id>, .../-/pipelines/<id>), alone or with "pourquoi ça a fail ?", "le job est rouge", "lis le plan il est chelou", "check moi le plan" (Terraform/Terragrunt plan). Not for a rollout after a merge (post-merge-verify).
 ---
 
 # GitLab job triage

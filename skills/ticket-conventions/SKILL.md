@@ -1,6 +1,7 @@
 ---
 name: ticket-conventions
-description: Conventions and API gotchas for writing to a tracker or an MR/PR - creating a Jira issue or a GitLab issue, posting a comment on an existing ticket, writing an MR/PR description. Load BEFORE any tracker write, again before each one even if already loaded earlier in the session, and on "fais un ticket", "crée le ticket", "update le ticket", "commente", "commente le ticket", "ouvre une issue", "ouvre la MR", "description de la MR", "poste ça sur PE-xxxx", "le ticket est prêt / à tester". On "ouvre la MR", load it together with mr-open, which owns the branch, commits and push while this one owns the description text. Not for jira-cli command syntax (that is jira-cli).
+description: >-
+  Use BEFORE every write to a tracker or an MR/PR description, even if loaded earlier: "fais un ticket", "commente le ticket", "update le ticket", "ouvre une issue", "ouvre la MR" (with mr-open), "description de la MR", "poste ça sur PE-xxxx". Not for jira-cli syntax (jira-cli).
 ---
 
 # Ticket conventions
