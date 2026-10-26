@@ -1,7 +1,7 @@
 ---
 name: grafana-dashboards
 description: >-
-  Use for any Grafana dashboard or PromQL work, BEFORE gcx:create-dashboard: a pasted /d/<uid> URL, "dash", "panel", creating, editing or cleaning a dashboard, a dashboard that OOMs Thanos, empty panels, slow variables, a wrong-looking number, an audit of dashboards using a metric. Not for stackdriver panels (grafana-cloud-monitoring) or alert rules (equativ-add-alert).
+  Use for any Grafana dashboard or PromQL work, BEFORE gcx:create-dashboard: a pasted /d/<uid> URL, "dash", "panel", creating, editing or cleaning a dashboard, a dashboard that OOMs Thanos, empty panels, slow variables, a wrong-looking number, an audit of dashboards using a metric. At Equativ, load equativ-observability with it. Not for stackdriver panels (grafana-cloud-monitoring) or alert rules (equativ-add-alert).
 ---
 
 # Authoring Grafana dashboards and PromQL
