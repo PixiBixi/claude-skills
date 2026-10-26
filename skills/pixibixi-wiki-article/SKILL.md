@@ -58,6 +58,8 @@ Le `CLAUDE.md` du projet porte le style de fond (ton, structure, tournures). Ce 
 - **Chiffres toujours en chiffres, jamais en lettres** : « 3 shards », « 12 fichiers », « 100 caches », y compris en début de phrase. Seule exception, les approximations restent en lettres (« une vingtaine de clusters », « la centaine de pods ») - les écrire en chiffres inventerait une précision qui n'existe pas.
 - **Un chiffre précis se justifie sur place, sinon il n'y est pas.** Écrire « garde 14 mois de métriques » en intro alors que le 14 vient d'un palier expliqué 100 lignes plus loin laisse le lecteur devant un nombre arbitraire. Soit on explique là, soit on reste générique (« aussi longtemps qu'on le lui demande ») et le chiffre arrive avec sa raison.
 
+    Une mesure ponctuelle tirée d'un incident (« un job de 10 secondes qui en passe 76 en `Pending` ») ne se répète pas ailleurs : sa précision n'apprend rien au lecteur et date l'article. On garde l'ordre de grandeur (« plusieurs dizaines de secondes »), puis on reprend chaque renvoi au même chiffre dans l'article.
+
     Un chiffre faux ou non sourcé ne se corrige pas en adverbe. Remplacer « 4-5x moins cher » par « nettement moins cher » efface l'erreur et l'information avec. Chercher le chiffre que l'éditeur publie, même partiel (« jusqu'à 91 % », doc Compute Engine), et le lier à sa source.
 - **Unités de temps collées au chiffre** : `24h/24`, `12h`, `3h`, `6d`. Pas d'espace avant le symbole, c'est la convention de tout le wiki. La forme en mot (`12 heures`) reste valable en prose, mais on ne mélange pas `12 h` et `12h` dans le même article.
 - **Guillemets français** `« … »` avec une espace intérieure, pas de `"…"` droits dans la prose. C'est la convention des articles récents.
@@ -99,6 +101,8 @@ Ce qui échoue :
 2. **groupe nominal court**, éventuellement `Sujet : qualifier` - `Un shard par tranche de temps`, `Un seul cache chaud pour toute la flotte`, `Nos tests et nos échecs`, `Réplication : le choix assumé`, `Receive : le composant le plus cher`
 
 Un titre à l'infinitif promet une action, donc il n'est valable que si la section fournit vraiment cette action. Quand elle ne fait que constater, c'est le groupe nominal qui va.
+
+Un titre ne contredit pas sa section. `Absorber le cold start d'un node Spot` au-dessus d'une phrase qui explique que le cold start n'est pas propre à Spot fait relire le titre deux fois. Quand la section élargit le sujet, le titre suit : `Absorber le cold start du scale from zero`. Relire chaque titre contre la première et la dernière phrase de sa section.
 
 Un titre dit **ce que la section fait gagner**, pas le mécanisme qu'elle décrit :
 
@@ -143,6 +147,10 @@ L'erreur la plus fréquente, c'est de découper pour faire du rythme. Une phrase
 **Ne pas** viser un plafond de mots par phrase. Cette voix accepte 40 mots quand ils coulent :
 
 > Une store gateway qui sert tout le bucket doit être dimensionnée pour la requête la plus violente qu'on lui posera jamais, par exemple un dashboard avec un timerange de 6 mois qui va charger énormément de donnée en RAM sur tous les replicas.
+
+### Un paragraphe, une idée
+
+Le même travers existe à l'échelle du paragraphe. Un bloc de 8 phrases qui enchaîne ce que fait l'outil, sa version, ce qu'il hérite et ses limites fatigue l'œil. L'excès inverse sonne aussi faux : une phrase par paragraphe, avec une ligne vide entre chacune, découpe le raisonnement en slides (« Le second levier réserve de la capacité d'avance. » isolée, puis la version isolée, puis l'héritage isolé). On coupe là où l'idée change, ce qui donne en général des paragraphes de 2 à 4 phrases : ce que c'est et depuis quand, puis ce que ça reprend et comment on le règle, puis les limites.
 
 Les tournures qui sonnent faux (amorces « Concrètement : », fragments d'insistance, chaînes de conséquences, absolus non vérifiés, « je »…) sont listées dans `references/phrase.md`. Le lire avant de rédiger (étape 2) et pendant la passe sur la voix (étape 3).
 
