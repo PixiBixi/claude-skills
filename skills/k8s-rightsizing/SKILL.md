@@ -1,7 +1,7 @@
 ---
 name: k8s-rightsizing
 description: >-
-  Use when sizing CPU/memory requests or limits of a Kubernetes workload from its real usage: "on peut réduire cette RAM ?", "rightsize X", "combien consomme <workload>", "il a déjà été OOMKilled ?", "baisse les requests", a FinOps cut. Not for CI runners, node pools or a live OOM incident.
+  Use when sizing CPU/memory requests or limits of a Kubernetes workload from its real usage, and before any edit of a `resources:` block in Helm values: "on peut réduire cette RAM ?", "rightsize X", "combien consomme <workload>", "il a déjà été OOMKilled ?", "baisse les requests", a FinOps cut. Not for CI runners, node pools or a live OOM incident.
 ---
 
 # K8s rightsizing
