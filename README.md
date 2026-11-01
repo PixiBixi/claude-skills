@@ -69,6 +69,7 @@ From inside a session: `/plugin install wiki --marketplace PixiBixi/claude-skill
 | `pixibixi-wiki-article` | Write an article for wiki.jdelgado.fr | "écris un article wiki" |
 | `wiki-fact-check` | Fact-check a wiki article before commit | "fact-check", "relis avant commit" |
 | `scoping-a-website` | Scope a website before design or code | "refais mon site" |
+| `auditing-mobile-layout` | Play a web app or game through on six emulated phones and measure the layout | `/auditing-mobile-layout` only |
 | `rss-digest` | Catch up on a FreshRSS backlog as a digest | "fais-moi le digest RSS" |
 
 ## Install from a clone
