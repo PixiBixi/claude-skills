@@ -30,7 +30,7 @@ echo '.mobile-audit/' >> "$(git rev-parse --git-path info/exclude)"   # also rig
 npx playwright install webkit chromium-headless-shell
 ```
 
-1. Build the app and start its production server in the background, then `until nc -z 127.0.0.1 <port>; do sleep 0.5; done`. A stale build is an old app under a new test.
+1. Build the app and start its production server in the background on a port of its own, keeping its PID, then `until nc -z 127.0.0.1 <port>; do sleep 0.5; done`. A stale build is an old app under a new test. Stop it with `kill <pid>`: a `pkill -f` on the server's path also kills the server of any other session working on a sibling app.
 2. Write `${AUDIT}/game.spec.ts` from `references/game-bot.md`, the only game-specific file. Skip it for an app with no flow beyond its URLs.
 3. In the background, first one profile, then all six:
 
@@ -42,6 +42,7 @@ AUDIT_DIR="${OUT}" AUDIT_BASE_URL=http://127.0.0.1:<port> AUDIT_PATHS=/ \
 
 4. "Is it stuck?": `tail -1 "${OUT}/progress.log"`, one line per move. A loop that stops writing for 30s throws with the move number.
 5. `bash "${CLAUDE_SKILL_DIR}/scripts/summary.sh" "${OUT}"`, then stop the server.
+6. Move `${AUDIT}` to the scratchpad (`mv "${AUDIT}" "${OUT}/specs"`) before any lint or commit: a linter run over `.` (`eslint .`) parses it and fails. Copy it back to rerun.
 
 ## What counts
 
