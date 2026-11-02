@@ -76,4 +76,4 @@ xmllint --noout "$F"
 rg -n '#[0-9a-fA-F]{3,6}\b' "$F"
 ```
 
-3. Rendu réel sur `mkdocs serve -f mkdocs.dev.yml --livereload` (rebuild ~6s, voir l'`AGENTS.md` du repo), en clair **et** en sombre, avec Playwright (`channel: 'chrome'`, `colorScheme`, `waitUntil: 'load'` : livereload empêche `networkidle` de jamais se terminer). Capturer le schéma dans l'article **et la lightbox ouverte** : c'est là que le fond blanc est resté la première fois, et rien d'autre ne l'attrape.
+3. Rendu réel sur `properdocs serve -f properdocs.dev.yml --livereload` (rebuild ~6s, voir l'`AGENTS.md` du repo), en clair **et** en sombre, avec Playwright (`channel: 'chrome'`, `colorScheme`, `waitUntil: 'load'` : livereload empêche `networkidle` de jamais se terminer). Capturer le schéma dans l'article **et la lightbox ouverte** : c'est là que le fond blanc est resté la première fois, et rien d'autre ne l'attrape.

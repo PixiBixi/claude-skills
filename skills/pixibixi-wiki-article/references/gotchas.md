@@ -39,7 +39,7 @@ Un repli `???` autour d'un bloc de code ne sert plus à rien non plus : `jd-code
 
 Les onglets (`=== "Label"`, `pymdownx.tabbed`) suivent la même mécanique. On colle le contenu indenté **directement** sous la ligne `=== "Label"`, sans ligne vide, et on ne met pas de ligne vide entre une phrase et un bloc fencé dans le même onglet : la ligne vide fait lire la suite comme du code indenté et MD046 casse. Le thème habille un onglet comme un bloc de code, donc on n'y met que du code ou une capture, et la phrase qui introduit les variantes reste au-dessus du groupe. Un onglet n'est valable que si le lecteur choisit une variante parmi plusieurs (distro, méthode d'install, shell, captures de dashboards), jamais pour des étapes à enchaîner. Les H3 remplacés par des onglets sortent du sommaire et perdent leur ancre.
 
-## Gotcha 4 - `mkdocs build --strict` a besoin de `DYLD_FALLBACK_LIBRARY_PATH`
+## Gotcha 4 - `properdocs build --strict` a besoin de `DYLD_FALLBACK_LIBRARY_PATH`
 
 Le plugin `social` génère les cartes via `cairosvg`, qui charge `libcairo` par `dlopen`. Le Python de `uv` ne regarde pas dans Homebrew, d'où 244 warnings `cairo` (un par page) qui font abort `--strict` sans aucun rapport avec le contenu.
 
@@ -47,10 +47,12 @@ Le plugin `social` génère les cartes via `cairosvg`, qui charge `libcairo` par
 
 ```bash
 DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib:$HOME/lib:/usr/local/lib:/usr/lib" \
-  uv run mkdocs build --strict
+  uv run properdocs build --strict
 ```
 
 Avec ça le build sort en 0. Le seul warning non bloquant qui reste est `WARNING:root:` du plugin git-revision-date, y compris en `--strict`.
+
+Un fichier modifié mais pas commité prend sa date de son mtime, avec des microsecondes que le plugin RSS refuse (`[RSS-plugin]: Incompatible date found`, une erreur par fichier) : `--strict` abort en local alors que la CI, qui date depuis git, passe. Ces erreurs-là ne viennent pas de l'article, tout autre `ERROR` si.
 
 ## Gotcha 5 - une ancre vers un titre accentué casse MD051
 

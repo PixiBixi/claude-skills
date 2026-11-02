@@ -18,10 +18,10 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 |---|---|
 | Repo | `pixibixi.github.io` (branche `master`) |
 | Articles | `docs/<section>/<nom>.md` (ex. `docs/ci-cd/github/go-ci.md`) |
-| Build local (repro CI) | `DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib:$HOME/lib:/usr/local/lib:/usr/lib" uv run mkdocs build --strict` (Gotcha 4) |
+| Build local (repro CI) | `DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib:$HOME/lib:/usr/local/lib:/usr/lib" uv run properdocs build --strict` (Gotcha 4) |
 | Lint markdown (repro CI) | `npx -y markdownlint-cli2@0.23.0 --config .markdownlint.json <fichiers.md>` |
 | Rendu SVG en PNG (contrôle visuel) | `rsvg-convert -b '#0d1117' fichier.svg -o out.png` |
-| Nav | **auto-générée depuis l'arborescence** (pas de bloc `nav:` dans `mkdocs.yml`) |
+| Nav | **auto-générée depuis l'arborescence** (pas de bloc `nav:` dans `properdocs.yml`) |
 
 ## Workflow
 
@@ -31,7 +31,7 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 4. **Cross-linker** les articles liés (dans les deux sens) via une admonition `!!! tip` ou un lien inline.
 5. **Schéma** si un *flux* le mérite (voir "Schémas SVG"). Sinon un tableau suffit.
 6. **⚠️ Wirer les DEUX index** (voir Gotcha 1) - l'étape le plus souvent oubliée.
-7. **Build + vérifier** : `mkdocs build --strict` préfixé du `DYLD_FALLBACK_LIBRARY_PATH` (Gotcha 4), puis relint markdown (Gotchas 2, 3 et 5). Contrôler que le SVG est copié et la balise `<img>` résolue.
+7. **Build + vérifier** : `properdocs build --strict` préfixé du `DYLD_FALLBACK_LIBRARY_PATH` (Gotcha 4), puis relint markdown (Gotchas 2, 3 et 5). Contrôler que le SVG est copié et la balise `<img>` résolue.
 8. **Vérifier l'exactitude** - invoquer le skill `wiki-fact-check`. L'étape 7 prouve que l'article s'affiche, pas qu'il dit vrai. Sur un article neuf ou une réécriture de fond, c'est non négociable. Le rapport passe par l'auteur avant correction.
 9. **Montrer le diff à l'auteur** après toute passe qui touche à la prose (wording, corrections du fact-check) : `python3 -I scripts/wiki_compare.py` depuis le repo (en arrière-plan, le serveur de dev doit tourner) ouvre la page live et la page locale côte à côte, scroll lié et blocs modifiés surlignés. On attend sa relecture avant de committer.
 10. **Committer par scope** (Conventional Commits, un commit par portée), rebase sur `origin/master`, push.
