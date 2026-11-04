@@ -80,17 +80,8 @@ To prove a query with your own credentials rather than the datasource's service 
 ## Common mistakes
 | Symptom | Cause | Fix |
 |---|---|---|
-| GCM panel "No data", editor opens on Query type **Builder** | JSON target carried only `promQLQuery`, `migrateQuery` rewrote it | ship a `timeSeriesList` stub next to `promQLQuery` |
-| GCM panel empty, the same expr returns series on another project | `projectName` is a scoping project, PromQL reads one project | point `projectName` at the project owning the metric |
-| GCM quota query rejected outright, not empty | metric maps to several monitored resource types | add `monitored_resource="consumer_quota"` |
-| GCM quota panel empty with no error at all | filtered on `project_id` for a new-style resource | filter on `resource_container` |
-| GCM panel error `ReadString: expects " or n, but found {` | a 403 rendered as a parse failure | grant `roles/monitoring.viewer` to the datasource SA on that project |
-| GCP quota stat empty although the quota exists | quota metrics publish sparsely, the instant read is empty | keep `last_over_time(...[6h])` |
-| Converted GMP metric absent, other converted names all work | the `:` rule does not apply to `prometheus_target` metrics | use the bare Prometheus name (`apiserver_request_total`) |
-| Migrated dashboard's table lost its Project / Service columns | PromQL mode cannot do `format: table`, `reduce` folds labels into one text column | set `labelsToFields: true` on the `reduce` transformation, never switch the panel to MQL |
 | MQL table reads "No data" and nothing is actually wrong | MQL has no `absent()`, so no healthy-state fallback | set `fieldConfig.defaults.noValue` on the panel |
 | MQL columns come out named `resource.project_id` (or `project_id`) | Grafana's label naming is not guessable | put both spellings in `renameByName`, unmatched renames no-op |
 | Audit reports a GCM dashboard as having no queries | a `$.panels[*].targets[*].expr` sweep misses GCM's own query paths | also read `promQLQuery.expr` and `timeSeriesQuery.query` |
-| Variables dead after moving panels to GCM | a GCM datasource cannot serve `label_values()` | rebuild as `custom` (single-select for `projectName`) or `textbox` regex |
 
 Every one of these returns a plausible wrong answer or an empty panel rather than an error, which is why they cost hours. The PromQL itself is almost never the problem.
