@@ -26,7 +26,9 @@ git -C "$M" log --oneline -5 "$B"
 | New optional input or output, new feature, behavior unchanged when unset | minor |
 | Fix, docs, CI only | patch |
 
-Follow the existing tag scheme exactly. Message: subject = the change in one line with the ticket key; body = what callers see, and whether bumping plans no change. Signed through `tag.gpgsign`:
+Follow the existing tag scheme exactly. Message: subject = the change in one line with the ticket key; body = what callers see, and whether bumping plans no change.
+
+**Gate, before any command below**: confirm `$B` is the merge commit of the MR, show the tag name and message, and wait for a yes. A pushed tag is consumed immediately and is never re-pointed. Signed through `tag.gpgsign`:
 
 ```bash
 VERSION=16.3.0                                   # the version chosen above, in the existing scheme
@@ -34,8 +36,6 @@ git -C "$M" tag -a "$VERSION" "$B" -F "$MSG"
 git -C "$M" tag -v "$VERSION"
 git -C "$M" push origin "$VERSION"
 ```
-
-Confirm `$B` is the merge commit of the MR before tagging. Show the tag name and message and wait for a yes: a pushed tag is consumed immediately and is never re-pointed.
 
 ## 2. Find every caller
 
