@@ -35,7 +35,7 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 8. **Vérifier l'exactitude** - invoquer le skill `wiki-fact-check`. L'étape 7 prouve que l'article s'affiche, pas qu'il dit vrai. Sur un article neuf ou une réécriture de fond, c'est non négociable. Le rapport passe par l'auteur avant correction.
 9. **Montrer le diff à l'auteur** après toute passe qui touche à la prose (wording, corrections du fact-check) : `python3 -I scripts/wiki_compare.py` depuis le repo (en arrière-plan, le serveur de dev doit tourner) ouvre la page live et la page locale côte à côte, scroll lié et blocs modifiés surlignés. On attend sa relecture avant de committer.
 10. **Committer par scope** (Conventional Commits, un commit par portée), rebase sur `origin/master`, push.
-11. **Watcher la CI** : `gh run watch <id> --repo PixiBixi/pixibixi.github.io --exit-status`. Ne pas considérer le travail fini avant que `lint` **et** `deploy` soient verts.
+11. **Watcher la CI**, seulement pour un article neuf ou sur demande : `gh run watch <id> --repo PixiBixi/pixibixi.github.io --exit-status`, fini quand `lint` **et** `deploy` sont verts. Petite mise à jour d'un article existant : lint + build strict en local (étape 7), push, donner le hash du commit, pas de watch.
 
 ## Conventions MkDocs Material
 
@@ -174,4 +174,4 @@ Les 5 pièges (index à wirer, markdownlint sur les seuls fichiers changés, MD0
 - Un H1 qui se décrit lui-même (`nos arbitrages`) ou qui ne couvre qu'un des axes de l'article.
 - Découper un exemple en nouvelle phrase avec « Concrètement : » au lieu de `, par exemple …`.
 - Viser un plafond de mots par phrase : ce n'est pas le critère, la construction l'est.
-- Déclarer terminé sans avoir vu la CI verte (`lint` + `deploy`).
+- Déclarer un article neuf terminé sans avoir vu la CI verte (`lint` + `deploy`).
