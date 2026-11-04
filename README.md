@@ -72,6 +72,18 @@ From inside a session: `/plugin install wiki --marketplace PixiBixi/claude-skill
 | `auditing-mobile-layout` | Play a web app or game through on six emulated phones and measure the layout | `/auditing-mobile-layout` only |
 | `rss-digest` | Catch up on a FreshRSS backlog as a digest | "fais-moi le digest RSS" |
 
+## Anatomy of a skill
+
+```text
+skills/<name>/
+├── SKILL.md            # frontmatter + workflow, the only file always read
+├── references/*.md     # recipes and traps, loaded on demand
+├── scripts/            # bundled tooling, called via ${CLAUDE_SKILL_DIR}
+└── evals/              # trigger and behaviour evals
+```
+
+Writing rules for new skills are in [AGENTS.md](AGENTS.md).
+
 ## Install from a clone
 
 To get the short skill names (`/mr-open` instead of `/pixibixi:mr-open`), symlink each skill into `~/.claude/skills`, as the [dotfiles](https://github.com/PixiBixi/dotfiles) `init_mac.sh` does:
@@ -95,9 +107,7 @@ done
 | `make validate` | `claude plugin validate` on the manifests |
 | `make check-anchors` | Check that the wiki URLs and anchors cited by the `wiki` plugin skills exist on the live site (also run weekly by CI). `--site <dir>` checks a local MkDocs build instead, which the wiki CI runs before each deploy |
 | `make check` | Dry-run diff of upstream-mirrored skills |
-| `make update-skills` | Sync upstream-mirrored skills, one commit per skill |
-
-A skill whose `SKILL.md` carries a `source:` frontmatter field mirrors an upstream file and is overwritten by `make update-skills`. Skills without it are authored here. Writing rules for new skills are in [AGENTS.md](AGENTS.md).
+| `make update-skills` | Sync upstream-mirrored skills (`source:` in frontmatter), one commit per skill |
 
 ## License
 
