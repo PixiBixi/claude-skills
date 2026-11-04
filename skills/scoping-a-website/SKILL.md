@@ -1,7 +1,7 @@
 ---
 name: scoping-a-website
 description: >-
-  Use before designing or coding a website: create, redesign or restyle a site, landing page or portfolio, a design proposal for a URL, static vs SSG vs SPA, or making a site faster on mobile ("refais mon site", "fais-moi des maquettes", "le site rame", "Lighthouse"). Not for a one-off HTML page to share (artifact-design).
+  Use before designing or coding a website: build or redesign a site, landing page or portfolio, a design proposal for a URL, static vs SSG vs SPA, or making a site faster on mobile ("refais mon site", "fais-moi des maquettes", "le site rame"). Not for a one-off HTML page to share (artifact-design).
 ---
 
 # Scoping a website
@@ -37,7 +37,7 @@ If the user says "surprends-moi", "carte blanche" or is in a hurry, ask a single
 
 ## Architecture verdict
 
-State a verdict with its reason, in the brief.
+State a verdict with its reason, in the brief. A framework the user names (React) does not decide it: apply the table, explain, let them choose.
 
 | Site needs | Build it as |
 |---|---|
@@ -88,14 +88,3 @@ Open questions / placeholders:
 ## Before showing anything
 
 Read `references/prototype-checklist.md` and apply it to every prototype: readability, the four widths in both themes via `${CLAUDE_SKILL_DIR}/scripts/screenshot.sh`, motion checked in a real browser, and the performance rules (deferred libraries, preloaded fonts, lazy images, paused offscreen loops).
-
-## Common mistakes
-
-| Mistake | Fix |
-|---|---|
-| Asking only "which visual style?" | Identity and hard no's matter more than style labels |
-| Static mockups for a user who wants motion | Ask the motion level first, prototype live |
-| Dropping questions because the user is in a hurry | Use the single-call variant above |
-| Defaulting to a SPA because the user said React | Apply the verdict table, explain, let them choose |
-| Inventing numbers to fill a design | Placeholders, and verify counts at the source |
-| Ten shallow directions | Three deep ones, each personal |
