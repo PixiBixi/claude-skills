@@ -1,7 +1,6 @@
 ---
 name: auditing-mobile-layout
-description: >-
-  Use when a web app or browser game must be checked on phones, iPhone and Android, portrait and landscape, by playing it through in emulated devices and measuring the layout. Triggers - "vérifie le responsive", "check sur mobile", "ça rend comment sur iPhone", "joue une partie complète sur mobile". Not for a single desktop e2e spec or a visual redesign (scoping-a-website).
+description: Play a web app or browser game through on emulated iPhone and Android, portrait and landscape, and measure the layout.
 disable-model-invocation: true
 ---
 
