@@ -1,7 +1,7 @@
 ---
 name: mr-open
 description: >-
-  Use when committing work and opening or updating a GitLab MR or GitHub PR: "fais la MR", "ouvre la MR", "commit & push", "push et MR", "ajoute un commit à la MR", "update la MR". Load ticket-conventions with it for the description. Not for merging (mr-batch-merge) or review threads (addressing-gitlab-review-comments).
+  Use when committing work and opening or updating a GitLab MR or GitHub PR: "ouvre la MR", "commit & push", "update la MR". Load ticket-conventions with it for the description. Not for merging (mr-batch-merge) or review threads (addressing-gitlab-review-comments).
 ---
 
 # Open an MR
@@ -63,15 +63,3 @@ glab mr create \
 1. `echo "<url>" | pbcopy`, then answer with the link and one line.
 2. New commits on an open MR: push, then rewrite the description to cover them (`glab mr update <iid> --description-file "$BODY"`).
 3. Offer the follow-up reminder in one line (`tickler`) when the change should move performance or cost.
-
-## Common mistakes
-
-| Mistake | Instead |
-|---|---|
-| Branching from the local target branch | `origin/<target>` after a fetch |
-| One commit mixing two scopes | One commit per scope |
-| `glab mr create` without `--yes` | Hangs; always `--yes` |
-| `--description "$(...)"` with inline backticks | `--description-file` |
-| Server-side rebase | Local rebase, commits stay signed |
-| Description left stale after new commits | `glab mr update --description-file` |
-| French in the MR | English, even in a French session |
