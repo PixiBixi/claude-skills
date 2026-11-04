@@ -27,6 +27,7 @@ A panel that is empty, slow, OOMs the query layer or shows a plausible but wrong
 | Is a metric or datasource still read, renaming a template variable | `references/audits-and-renames.md` |
 | A symptom on an existing panel | `references/troubleshooting.md` |
 | Component folder layout | `references/folder-layout.md` |
+| Reading or patching an existing dashboard's JSON (v1 vs v2 paths, GCM panels, empty JSONPath) | `references/reading-dashboard-json.md` |
 
 ## gcx setup
 Every Grafana call in this skill's tools goes through `gcx`. Check it once per session:
@@ -82,22 +83,7 @@ python3 $SKILL/scripts/lint_dashboard.py mydash.json          # or --folder "K8S
 
 Errors exit 1, so it gates a commit; a `--uid` or folder dashboard it could not fetch exits 2, never a clean 0. The folder-layout rules are warnings only, so legacy folders still pass. Run `--help` for the flags. Two caveats: its language check is a heuristic that surfaces candidates, so read what it reports rather than trusting the count, and on a folder it aligns the datasource variable on the name carried by **more than half** of the dashboards that have one, because every rename breaks the `?var-<name>=` in existing bookmarks. Below that bar the naming check is skipped: a mere plurality is not a convention, pass `--expect-ds-var` to pick one.
 
-Two things it cannot decide for you:
-
-**An empty `[]` from a JSONPath is not proof of absence.** It also means "you asked for the wrong shape". `$.panels[*].targets[*].datasource.uid` returns `[]` both when no target carries a datasource *and* when every target carries one as a plain string, the two are indistinguishable. Query the parent (`.datasource`) and look at what comes back before concluding anything is missing.
-
-**A `$.panels[*].targets[*].expr` sweep is blind to every GCM panel.** A fully migrated Cloud Monitoring dashboard comes back with no queries at all under that path, which reads as "these panels were abandoned" when they are in fact working: the query lives in `promQLQuery.expr` (PromQL mode) or `timeSeriesQuery.query` (MQL mode) instead. Any audit that answers "which dashboards still use metric X" has to read all three paths; `scripts/grafana_metric_usage.py` already does (see `references/audits-and-renames.md`). Cross-check the target count with `$.panels[*].targets[*].queryType` before reading an empty result as an empty dashboard.
-
-**`gcx dashboards get -o json` returns a `dashboard.grafana.app/v2` manifest, where every v1 path is empty.** Check `.apiVersion` first, then read and patch these instead:
-
-| What | v2 path |
-|---|---|
-| Panels, keyed `panel-<id>` | `.spec.elements[<name>].spec` (`id`, `title`, `description`, `vizConfig`) |
-| Queries | `.spec.elements[<name>].spec.data.spec.queries[].spec.query.spec.expr` / `.legendFormat` |
-| Rows and positions | `.spec.layout.spec.rows[].spec` (`title`) then `.layout.spec.items[].spec` (`x`, `y`, `width`, `height`, `element.name`) |
-| Variables | `.spec.variables[].spec` (`name`, `options`, `current`), type in `.kind` |
-
-A new panel needs both an `elements` entry and a `GridLayoutItem` referencing it; an element no row references is not drawn. Drop `.status` before pushing.
+Read `references/reading-dashboard-json.md` before reading or patching an existing dashboard's JSON or auditing which dashboards use a metric: an empty JSONPath is not proof of absence, GCM panels hide their queries from an `expr` sweep, and `gcx dashboards get -o json` returns a v2 manifest where every v1 path is empty.
 
 ## After a migration or import
 Before handing over: lint for negative `gridPos.y`, missing plugin panels and datasource uid remap, and check no panel shows "No data".
@@ -131,4 +117,4 @@ gcx dashboards create --api-version dashboard.grafana.app/v1beta1 -f create.json
 ## Google Cloud Monitoring datasources
 A panel on the `cloud-monitoring` datasource (plugin type `stackdriver`), in PromQL or MQL mode, is covered by the **`grafana-cloud-monitoring`** skill: metric name conversion, the `migrateQuery` rewrite that empties a JSON-authored panel, `monitored_resource`, MQL tables, and the pre-flight query validation via `gcx datasources cloudmonitoring query`.
 
-Two things worth knowing from here: a GCM datasource cannot serve `label_values()`, so migrating panels onto it kills the dashboard's `type: query` variables, and a bare `expr` sweep reads only PromQL-mode targets, so a GCM dashboard in MQL mode looks queryless unless `promQLQuery.expr` and `timeSeriesQuery.query` are also read (see § Before you save above).
+Two things worth knowing from here: a GCM datasource cannot serve `label_values()`, so migrating panels onto it kills the dashboard's `type: query` variables, and a bare `expr` sweep reads only PromQL-mode targets, so a GCM dashboard in MQL mode looks queryless unless `promQLQuery.expr` and `timeSeriesQuery.query` are also read (see `references/reading-dashboard-json.md`).
