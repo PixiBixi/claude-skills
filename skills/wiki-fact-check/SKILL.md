@@ -103,17 +103,8 @@ A claim that could not be sourced is not validated. It goes out as IMPRECISE, no
 | A Kubernetes API field and its default | `kubernetes/api`, `core/v1/types.go`, the field comment |
 | GA or beta | `pkg/features/kube_features.go` for Kubernetes, the CHANGELOG otherwise |
 | A borrowed performance number | The originating PR or benchmark. An unsourced round number is almost always wrong |
-| A CLI behaviour | The subcommand's code first, the docs second |
+| A CLI behaviour | The subcommand's code first, the docs second. A tool's output: run it when that is cheap and paste what it prints (an agent rebuilt the `renovate-config-validator` message from `validation.ts` and quoted a warning, while the run prints an error first) |
 
-## Common mistakes
-
-- **Verifying while reading** instead of extracting first: whatever does not catch the eye never gets checked.
-- **Filing something as a nuance when it changes what the reader does.** The rubric decides, not the impression.
-- **Quoting from memory.** A paraphrase inside quotation marks passes an invention off as a source.
-- **Stopping at the docs** for a default value or a metric name.
-- **Deriving a tool's output from its source when running it is cheap.** An agent rebuilt the `renovate-config-validator` message from `validation.ts` and quoted a warning, while the run prints an error first, and that error text is the one that stayed stable across versions. Run the tool, paste what it prints.
-- **Re-checking YAML and JSON fences**, already covered by the repo hook.
-- **Fixing on the spot.** The report goes to the author first: when a number comes from their own measurement, only they know which one is right.
 
 ## Cost
 
