@@ -53,6 +53,7 @@ From inside a session: `/plugin install wiki --marketplace PixiBixi/claude-skill
 |-------|-----|--------------|
 | `k8s-rightsizing` | Size Kubernetes requests and limits from real usage | "on peut réduire cette RAM ?" |
 | `claude-usage-audit` | Analyse Claude Code token usage from local transcripts | "analyse mon usage token" |
+| `handoff` | Write a session handoff before a break, resume it in a fresh session | `/handoff` only |
 
 ### Tickets and docs
 
