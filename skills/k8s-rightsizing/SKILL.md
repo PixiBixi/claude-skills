@@ -1,7 +1,7 @@
 ---
 name: k8s-rightsizing
 description: >-
-  Use when sizing CPU/memory requests or limits of a Kubernetes workload from its real usage, and before any edit of a `resources:` block in Helm values: "on peut réduire cette RAM ?", "rightsize X", "combien consomme <workload>", "il a déjà été OOMKilled ?", "baisse les requests", a FinOps cut. Not for CI runners, node pools or a live OOM incident.
+  Use when sizing CPU/memory requests or limits of a Kubernetes workload from its real usage, and before any edit of a `resources:` block in Helm values: "on peut réduire cette RAM ?", "combien consomme <workload>", "il a déjà été OOMKilled ?", a FinOps cut. Not for CI runners, node pools or a live OOM incident.
 ---
 
 # K8s rightsizing
@@ -55,14 +55,3 @@ One table per workload: container (or pod), current req/lim, measured p95/p99/pe
 ## 4. Ship
 
 Values change in the owning GitOps repo (`mr-open`), then check the rollout. Offer a reminder at +7 days (`tickler`) to re-measure and look for OOMKills.
-
-## Common mistakes
-
-| Mistake | Instead |
-|---|---|
-| "No data" from raw series on a global store | Look for the recording rules first |
-| Pod-level numbers applied to one container of a multi-container pod | Raw per-container series |
-| Average or median as the basis | p99 / peak over 7-14 days |
-| Cutting memory after an OOMKill | Report it, no cut |
-| Unfiltered range over every cluster | cluster + namespace (+ container) matchers |
-| A number without its window and env | "prod, 7d to 2026-10-11, pod-level p99 1.8Gi" |
