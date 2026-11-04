@@ -1,7 +1,7 @@
 ---
 name: incident-response
 description: >-
-  Use when a production issue is happening or suspected (alert fired, service down or degraded, error or latency spike, a deploy looks like the trigger), or for the postmortem that follows: "on a un incident", "c'est down en prod", "ça déconne en prod", "postmortem". Not for editing an alert rule (equativ-add-alert).
+  Use when a production issue is happening or suspected (alert fired, service down or degraded, error or latency spike, a deploy looks like the trigger), or for the postmortem that follows: "on a un incident", "c'est down en prod", "ça déconne en prod", "postmortem". Not for digging into a past or suspicious signal with no live impact (equativ-investigation), why one alert rule fires (investigate-alert) or editing an alert rule (alert-tuning).
 ---
 
 # Incident Response
