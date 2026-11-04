@@ -1,7 +1,7 @@
 ---
 name: ticket-conventions
 description: >-
-  Use BEFORE every write to a tracker or an MR/PR description, even if loaded earlier: "fais un ticket", "commente le ticket", "update le ticket", "ouvre une issue", "ouvre la MR" (with mr-open), "description de la MR", "poste ça sur PE-xxxx". Not for jira-cli syntax (jira-cli).
+  Use BEFORE every write to a tracker or an MR/PR description, even if loaded earlier: "fais un ticket", "commente le ticket", "update le ticket", "ouvre une issue", "ouvre la MR" (with mr-open), "description de la MR", "poste ça sur PE-xxxx". For an Equativ Jira ticket, load equativ-jira next for fields, sprint and ADF. Not for jira-cli syntax (jira-cli).
 ---
 
 # Ticket conventions
