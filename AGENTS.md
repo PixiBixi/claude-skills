@@ -64,7 +64,7 @@ A SKILL.md with a `source:` frontmatter field mirrors an upstream file (`conflue
 
 ## Writing rules
 
-Enforced by pre-commit and the `.claude/wordlist-guard.json` hook config:
+Enforced by prek and the `.claude/wordlist-guard.json` hook config:
 
 - No em dash, en dash or bullet character.
 - No hard-wrapped prose.
@@ -74,5 +74,5 @@ Enforced by pre-commit and the `.claude/wordlist-guard.json` hook config:
 
 - Conventional Commits scoped to the skill: `fix(mr-open):`, `feat(k8s-rightsizing):`, one skill per commit. Older history uses `chore(claude):`, do not copy it.
 - Signed commits, author `PixiBixi@users.noreply.github.com`.
-- `pre-commit run --all-files` and `make validate` before pushing.
+- `prek run --all-files` and `make validate` before pushing.
 - Cross-references use bare names, which resolve with the symlink install. Under the plugin install, skills are namespaced (`pixibixi:mr-open`).
