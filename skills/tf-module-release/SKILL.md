@@ -1,7 +1,7 @@
 ---
 name: tf-module-release
 description: >-
-  Use right after a Terraform module MR is merged, to tag the new version and bump its callers: "fais le tag & bump module.hcl", "tag une nouvelle version", "bump le module dans <repo>", "release le module", "<n> est merge, tag". Not for Helm chart releases.
+  Use right after a Terraform module MR is merged, to tag the new version and bump its callers: "fais le tag & bump module.hcl", "<n> est merge, tag". Not for Helm chart releases.
 ---
 
 # Terraform module release
@@ -54,14 +54,3 @@ List callers in a table: repo, file, current ref. A caller more than one major b
 - Commit `chore(<scope>): bump <module> to <version>` with the ticket key, body saying whether the plan is expected to be empty. Bump alone: an input change is its own `feat()` commit. One MR per repo (`mr-open`).
 - The MR plan (`gitlab-job-triage` to read it) must match the tag message: "no change" means zero add/change/destroy on every caller unit.
 - In repos that apply on merge, merging is the user's call.
-
-## Common mistakes
-
-| Mistake | Instead |
-|---|---|
-| Tagging the feature branch head or local `main` | The fetched default branch (`origin/HEAD`), the merge commit |
-| Changing the tag scheme (`v` prefix or not) | Copy the existing tags |
-| Lightweight or unsigned tag | `git tag -a`, verify with `git tag -v` |
-| Minor bump for a removed input | Major |
-| Grepping the working tree of a live repo | `git grep` on the fetched default branch |
-| Bumping and changing inputs in one commit | Two commits |
