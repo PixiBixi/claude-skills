@@ -1,7 +1,7 @@
 ---
 name: ticket-conventions
 description: >-
-  Use BEFORE every write to a tracker or an MR/PR description, even if loaded earlier: "fais un ticket", "commente le ticket", "update le ticket", "ouvre une issue", "ouvre la MR" (with mr-open), "description de la MR", "poste ça sur PE-xxxx". For an Equativ Jira ticket, load equativ-jira next for fields, sprint and ADF. Not for jira-cli syntax (jira-cli).
+  Use BEFORE every write to a tracker or an MR/PR description, even if loaded earlier: "fais un ticket", "ouvre une issue", "ouvre la MR" (with mr-open), "description de la MR", "poste ça sur PE-xxxx". For an Equativ Jira ticket, load equativ-jira next for fields, sprint and ADF. Not for jira-cli syntax (jira-cli).
 ---
 
 # Ticket conventions
@@ -51,31 +51,10 @@ Same restraint on an edit: re-read the whole description after amending it and c
 
 Same ceiling spirit, shorter still: what and why, test evidence, links. No narrated investigation ("trop verbose", "raconte pas ta vie"). English always, even in a French session. Never hard-wrap prose. After adding commits, update the description.
 
-## Jira: never invent a custom field id
+## Jira custom fields and sizing
 
-`customfield_10001` in one instance is not the same field in another. A wrong id either errors or **writes to the wrong field silently**, which nobody finds out about until an audit.
+Read `references/jira-fields.md` before setting any Jira custom field (ids differ per instance, a wrong id writes to the wrong field silently) and before proposing Story Points.
 
-If a field id is not already known, discover it read-only before writing:
+## GitLab issues
 
-- MCP: `getJiraProjectIssueTypesMetadata`, then `getJiraIssueTypeMetaWithFields` for the target issue type. Returns the ids, which are required, and the allowed values.
-- REST on a known-good ticket: `GET /rest/api/3/issue/<TICKET-ID>?expand=names` shows the ids next to human names, plus the exact value shape already stored in that field.
-
-Report what you found (name, id, value shape, allowed values) before using it. Value shapes differ per field: plain string, `{"value": ...}`, `{"id": ...}`, or an array. Take the shape from what discovery returned, never from a guess.
-
-If discovery is blocked, say so and create the ticket without that field, or stop if it is required. Do not retry with a guessed id.
-
-Sprint and other Agile board fields are usually not writable through the create API. When one cannot be set, create the ticket and say it needs a manual move on the board, rather than failing the whole write.
-
-## GitLab issues: the flags that hang
-
-```bash
-glab issue create --title "..." --description "$(cat <tempfile>)" --label a,b --yes --no-editor
-```
-
-- **`--yes`**: without it, `glab` waits for a submit confirmation keypress nobody can send. It reads as a hung tool call, not as a stuck prompt.
-- **`--no-editor`**: without it, `glab` opens `$EDITOR` for the description, same outcome.
-- There is no `--description-file`. Write the body to a temp file first, then read it into `--description`, so newlines and backticks survive the shell.
-
-## Sizing
-
-For a PE ticket, use the `sp-suggest` skill to see the Story Points of the most similar past tickets before proposing an estimate. It is a lookup, not a prediction: it anchors the number, the estimate stays yours.
+Read `references/gitlab-issues.md` before `glab issue create` (the flags that hang: `--yes`, `--no-editor`).
