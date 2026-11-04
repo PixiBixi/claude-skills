@@ -91,7 +91,7 @@ done
 
 | Command | Does |
 |---------|------|
-| `pre-commit install --hook-type pre-commit --hook-type commit-msg` | Enable the hooks after cloning |
+| `prek install -t pre-commit -t commit-msg` | Enable the hooks after cloning |
 | `make validate` | `claude plugin validate` on the manifests |
 | `make check-anchors` | Check that the wiki URLs and anchors cited by the `wiki` plugin skills exist on the live site (also run weekly by CI). `--site <dir>` checks a local MkDocs build instead, which the wiki CI runs before each deploy |
 | `make check` | Dry-run diff of upstream-mirrored skills |
