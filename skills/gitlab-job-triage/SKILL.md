@@ -68,15 +68,4 @@ Drift check: the same unit planned on the default branch, `glab ci trace <plan-j
 
 ## 4. Answer
 
-Two or three lines: job, first error with its unit, cause, what to change (file:line). For a plan: the table, then the flags. Fix only when asked.
-
-## Common mistakes
-
-| Mistake | Instead |
-|---|---|
-| Reading the tail of the log | First error, earliest failed stage |
-| `glab ci retry` "to see" | Read-only; a retry is the user's decision |
-| Unencoded path in `glab api` (404) | `%2F` |
-| "Plan looks fine" from the summary line | Per-unit table, every destroy/replace named |
-| Blaming the MR for drift | Compare with the default-branch plan |
-| `force-unlock` on a lock error | Report the lock holder |
+Two or three lines: job, first error with its unit, cause, what to change (file:line). For a plan: the per-unit table with every destroy/replace named, then the flags, never a verdict from the summary line. Fix only when asked.
