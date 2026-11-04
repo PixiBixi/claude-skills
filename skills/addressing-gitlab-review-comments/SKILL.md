@@ -1,7 +1,7 @@
 ---
 name: addressing-gitlab-review-comments
 description: >-
-  Use when a reviewer left comments on a GitLab MR to address, fix, answer or resolve: "check la review de <name>", "<name> a commenté la MR", "réponds à la review", an MR URL plus "review" or "commentaire". Not for reviewing someone else's MR (platform-mr-review).
+  Use when a reviewer left comments on a GitLab MR to address: "check la review de <name>", "réponds à la review", an MR URL plus "review" or "commentaire". Not for reviewing someone else's MR (platform-mr-review).
 ---
 
 # Addressing GitLab MR Review Comments
@@ -41,6 +41,7 @@ for line in sys.stdin:
 - **`new_line`** = the line in the *current* (post-change) file → this is what you read to interpret the comment.
 - A comment on a changed line carries both `old_line` and `new_line`; anchor on `new_path` + `new_line`.
 - No `position` → it's a general (non-inline) comment.
+- Print `d["id"]` whole: the API wants the full 40-char id, an 8-char prefix returns `404 Discussion Not Found`.
 
 ## 2. Read the code at each `new_path:new_line`, then fix
 
@@ -55,7 +56,7 @@ git push --force-with-lease   # a plain `git push` is enough only if the rebase 
 
 ## 3. Reply to and resolve each thread
 
-Posting to a discussion's `notes` endpoint auto-threads the reply (no `in_reply_to_id` needed). Then PUT `resolved=true`:
+Posting to a discussion's `notes` endpoint auto-threads the reply (no `in_reply_to_id` needed). Then PUT `resolved=true` (there is no `glab mr note resolve`):
 
 ```bash
 DISC="<discussion id from step 1>"
@@ -88,15 +89,3 @@ Resolve only the ones you actually closed out.
 | List inline comments + position | `glab api --paginate --output ndjson "$API/discussions"` → parse `.notes[].position.{new_path,new_line,old_line}` |
 | Reply to a thread | `glab api -X POST "$API/discussions/<id>/notes" -f "body=..."` |
 | Resolve a thread | `glab api -X PUT "$API/discussions/<id>?resolved=true"` |
-
-## Common Mistakes
-
-- **Using `glab mr view --comments` for inline comments**: gives text without file/line; you can't locate them. Use the discussions API.
-- **Inventing `glab mr note resolve`**: resolve via `glab api -X PUT ".../discussions/<id>?resolved=true"`.
-- **Reading `old_line` instead of `new_line`**: for a comment on a changed line, the current code is at `new_line`.
-- **Forgetting `--paginate`**: past 20 threads the discussions API silently returns only the first page.
-- **Bare `--force` after the rebase**: use `--force-with-lease`, so a commit the reviewer pushed meanwhile is not overwritten.
-- **Applying comments blindly**: evaluate first (receiving-code-review). Reply with what you actually changed, then resolve.
-- **Truncating the discussion id when listing threads**: the API wants the full 40-char id, an 8-char prefix returns `404 Discussion Not Found`. Print `d["id"]` whole.
-- **Over-explaining in the reply**: see "Writing the reply". The reasoning belongs in the MR description or the ticket.
-- **Resolving a deferred decision**: if the reviewer still has to choose, leave the thread open.
