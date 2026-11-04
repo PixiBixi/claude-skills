@@ -96,7 +96,6 @@ $VENV $SKILL/plot_grafana.py \
 
 ## Common mistakes
 
-- **Chart drawn from a query nobody checked** → see the PromQL pointer above; a plausible wrong number is the failure mode, not an error.
 - **401 from the proxy** → with a static token, it does not belong to that host; through gcx, the refresh token expired (about monthly), run `gcx login <context>`.
 - **Using system `python3`** → `ModuleNotFoundError: matplotlib`. Use the venv python.
 - **Empty/one flat line where you expect several** → the `--expr` regex matched a single series; widen the label matcher.
