@@ -33,6 +33,7 @@ When a global Thanos fans out to many per-cluster stacks, two things bite repeat
 - Histograms: keep `by (le)` in the inner `sum(rate(..._bucket[5m]))` or you get NaN.
 - Ratios: guard division by zero with `... / (sum(...) > 0)`.
 - **Subqueries: never stepless.** `[24h:]` re-evaluates the inner query at the default ~1m step (1440 times); write `[24h:5m]`, or better, read a pre-recorded series as a range vector.
+- **A long range read samples spikes away.** Over 30h the step is ~45m, so `rate(x[5m])` sees one window in nine and a 10-minute burst reads as 0. To find a peak, wrap it: `max_over_time(rate(x[5m])[$__interval:1m])` (or `max_over_time(gauge[<step>])`), per node or pod before any `sum`.
 - High cardinality: never put pod UIDs, request IDs or emails in labels.
 
 ## Aggregation traps (these return a plausible wrong number, not an error)
