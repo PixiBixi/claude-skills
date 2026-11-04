@@ -22,6 +22,8 @@ The user is confirming the wording **and the target**, not the intent, so the ga
 
 Show the full body, never a three-line excerpt: an excerpt hides exactly the mistakes the gate exists to catch. If the user edits the wording, show the revised draft and wait again. One approval covers one write.
 
+A change the user asks for on text already approved (a bold title, a reworded line, a typo) is applied directly, then shown: the request is the approval. The gate covers new content and new targets, not re-confirming the user's own instruction.
+
 When the user says go, create the ticket yourself. Never ask whether a small change deserves a ticket.
 
 After posting, output the direct link so it can be verified: `<baseUrl>/browse/<TICKET-ID>?focusedCommentId=<commentId>`.
