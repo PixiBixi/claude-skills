@@ -97,7 +97,8 @@ The answer is, in this order:
 1. One line: environment, window (start date and why), pod- or container-level.
 2. The workload table from `node_impact.py`, with the measured p95/p99/peak added per row: replicas, CPU req/limit, memory req/limit, before → after, and the nodes each change saves alone.
 3. The node table per group: today, after (fill to ideal), machine type, list price per month today and after.
-4. The total saving in USD/month (list price), and the changes rejected for zero node gain.
+4. The gain per change (one MR each), from the "Gain per change" table: nodes and USD/month each MR adds on top of the previous ones, structural changes first, so the rows sum to the total. A 1-node row is within bin-packing noise: say so.
+5. The total saving in USD/month (list price), and the changes rejected for zero node gain.
 
 ## 6. Ship
 

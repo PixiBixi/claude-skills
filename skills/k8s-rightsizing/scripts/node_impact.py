@@ -237,6 +237,35 @@ def main():
     print(f"\nList price, USD/month: today {tot[0]:,.0f}, after {tot[1]:,.0f} to {tot[2]:,.0f} "
           f"(saving {tot[0] - tot[1]:,.0f} to {tot[0] - tot[2]:,.0f}; fill {a.fill} to ideal packing).")
 
+    # Gain per change (one MR each): structural changes first, then the biggest cuts.
+    # Each row is what that MR adds on top of the rows above it, so the rows sum to the total.
+    def fleet(chs):
+        out = {}
+        for gk in shapes:
+            ideal = simulate(gk, chs)
+            out[gk] = (ideal, min(len(groups[gk]["nodes"]), -(-ideal // a.fill)) if a.fill < 1 else ideal)
+        return out
+
+    def usd(prev, cur, idx):
+        p = [(prev[gk][idx] - cur[gk][idx]) * (shapes[gk][1] or 0) * HOURS_PER_MONTH for gk in shapes]
+        return sum(p)
+
+    alone = {k: sum(simulate(gk, {x: v for x, v in changes.items() if x != k}) - ideal_all[gk] for gk in shapes)
+             for k in changes}
+    order = sorted(changes, key=lambda k: (not ({"spread", "replicas"} & changes[k].keys()), -alone[k], k))
+    print("\n## Gain per change, applied in this order\n")
+    print("| # | Change | Nodes removed (fill to ideal) | USD/month saved (fill to ideal) |")
+    print("|---|---|---|---|")
+    applied, prev = {}, fleet({})
+    for i, key in enumerate(order, 1):
+        applied[key] = changes[key]
+        cur = fleet(applied)
+        d_real = sum(prev[g][1] - cur[g][1] for g in shapes)
+        d_ideal = sum(prev[g][0] - cur[g][0] for g in shapes)
+        print(f"| {i} | {key} {json.dumps(changes[key])} | {int(d_real)} to {d_ideal} "
+              f"| {usd(prev, cur, 1):,.0f} to {usd(prev, cur, 0):,.0f} |")
+        prev = cur
+
 
 if __name__ == "__main__":
     main()
