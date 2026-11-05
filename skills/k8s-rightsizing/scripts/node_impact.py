@@ -120,11 +120,47 @@ def group_of(node):
     )
 
 
-def pack(items, cap_c, cap_m, per_node_max):
-    """First-fit decreasing on memory then CPU, capped per workload per node.
+def hard_zone_spread(spec):
+    return any(t.get("topologyKey") == "topology.kubernetes.io/zone" and t.get("whenUnsatisfiable") == "DoNotSchedule"
+               for t in spec.get("topologySpreadConstraints", []))
 
-    Returns (bins, worst) where worst is the highest share of one workload's
-    replicas sitting on a single node."""
+
+def split_zones(items, zones):
+    """Spread each workload evenly over the zones, as the default GKE zone spread does.
+
+    items are (key, cpu, mem, pinned_zone); a pinned pod (zonal PV) stays in its zone.
+    Returns {zone: [(key, cpu, mem)]} and the worst share of one workload in one zone."""
+    out = {z: [] for z in zones}
+    load = Counter()
+    per_key = defaultdict(Counter)
+    for key, c, m, pin in sorted(items, key=lambda x: (x[3] is None, -x[2], x[0])):
+        z = pin if pin in out else min(zones, key=lambda z: (per_key[key][z], load[z], z))
+        out[z].append((key, c, m))
+        per_key[key][z] += 1
+        load[z] += m
+    total = Counter(k for k, *_ in items)
+    worst = max((n / total[k] for k, zc in per_key.items() if total[k] > 1 for n in zc.values()), default=0.0)
+    return out, worst
+
+
+def pack(items, cap_c, cap_m, per_node_max, zones=None):
+    """First-fit decreasing on memory then CPU, capped per workload per node, per zone.
+
+    Returns (bins, worst_node, worst_zone): the highest share of one workload's
+    replicas on a single node, and in a single zone."""
+    if zones:
+        split, worst_zone = split_zones(items, zones)
+        total, worst = 0, 0.0
+        for z_items in split.values():
+            n, w = _pack(z_items, cap_c, cap_m, per_node_max, Counter(k for k, *_ in items))
+            total += n
+            worst = max(worst, w)
+        return total, worst, worst_zone
+    n, w = _pack([i[:3] for i in items], cap_c, cap_m, per_node_max, Counter(k for k, *_ in items))
+    return n, w, 1.0
+
+
+def _pack(items, cap_c, cap_m, per_node_max, total):
     bins = []
     for key, c, m in sorted(items, key=lambda x: (-x[2], -x[1])):
         if c > cap_c or m > cap_m:
@@ -138,7 +174,6 @@ def pack(items, cap_c, cap_m, per_node_max):
         b["c"] += c
         b["m"] += m
         b["n"][key] += 1
-    total = Counter(k for k, *_ in items)
     worst = max((b["n"][k] / total[k] for b in bins for k in b["n"] if total[k] > 1), default=0.0)
     return len(bins), worst
 
@@ -154,6 +189,8 @@ def main():
     ap.add_argument("--max-share", type=float, default=0.25,
                     help="blast radius: max share of a workload's replicas on one node (min 1 pod)")
     ap.add_argument("--shapes", default="", help="comma-separated machine types to compare per group")
+    ap.add_argument("--zones", default="auto",
+                    help="auto: the zones of today's nodes; off; or a list (a,b,c) to simulate other node locations")
     a = ap.parse_args()
 
     nodes = {n["metadata"]["name"]: n for n in json.load(open(a.nodes))["items"]}
@@ -167,6 +204,8 @@ def main():
     node_group = {name: group_of(n) for name, n in nodes.items()}
     for name, gk in node_group.items():
         groups[gk]["nodes"].append(name)
+    zone_of = {name: n["metadata"]["labels"].get("topology.kubernetes.io/zone") for name, n in nodes.items()}
+    zones = {"auto": sorted({z for z in zone_of.values() if z}), "off": []}.get(a.zones, a.zones.split(","))
 
     before_rows = {}
     for p in pods:
@@ -182,7 +221,9 @@ def main():
             continue
         key = f"{ns}/{name}"
         hard = hard_hostname_spread(p["spec"])
-        g["pods"].append((key, c, m))
+        # A pod with a PVC is assumed pinned to its zone (zonal PV).
+        pin = zone_of[n] if any("persistentVolumeClaim" in v for v in p["spec"].get("volumes", [])) else None
+        g["pods"].append((key, c, m, pin))
         row = before_rows.setdefault(key, {"replicas": 0, "cpu": c, "memory": m, "hard": hard,
                                            "cpu_limit": first(p["spec"], "limits", "cpu"),
                                            "memory_limit": first(p["spec"], "limits", "memory"),
@@ -214,21 +255,22 @@ def main():
         shapes[gk] = {"mtype": mtype, "usd_h": node_price(ref), "ds": (ds_c, ds_m),
                       "cap": (cpu(alloc["cpu"]) - ds_c, mem(alloc["memory"]) - ds_m)}
 
-    def per_node_max(chs):
+    def per_node_max(chs, share=None):
+        share = a.max_share if share is None else share
         out = {}
         for key, row in before_rows.items():
             ch = chs.get(key, {})
             replicas = ch.get("replicas", row["replicas"])
             hard = row["hard"] and ch.get("spread") != "soft"
-            out[key] = 1 if hard else max(1, math.floor(replicas * a.max_share))
+            out[key] = 1 if hard else max(1, math.floor(replicas * share))
         return out
 
     def items_after(gk, chs):
         g = groups[gk]
         after = []
-        for key, c, m in g["pods"]:
+        for key, c, m, pin in g["pods"]:
             ch = chs.get(key, {})
-            after.append((key, cpu(ch["cpu"]) if "cpu" in ch else c, mem(ch["memory"]) if "memory" in ch else m))
+            after.append((key, cpu(ch["cpu"]) if "cpu" in ch else c, mem(ch["memory"]) if "memory" in ch else m, pin))
         here = Counter(k for k, *_ in g["pods"])
         for key, ch in chs.items():
             if key in here and "replicas" in ch:
@@ -237,8 +279,8 @@ def main():
                 after = [x for x in after if x[0] != key] + [proto] * target
         return after
 
-    def simulate(gk, chs, cap=None):
-        return pack(items_after(gk, chs), *(cap or shapes[gk]["cap"]), per_node_max(chs))[0]
+    def simulate(gk, chs, cap=None, share=None):
+        return pack(items_after(gk, chs), *(cap or shapes[gk]["cap"]), per_node_max(chs, share), zones)[0]
 
     def at_fill(ideal, today):
         return min(today, math.ceil(ideal / a.fill)) if a.fill < 1 else ideal
@@ -271,7 +313,11 @@ def main():
     tot = [0.0, 0.0, 0.0]
     for gk in sorted(shapes, key=lambda k: -len(groups[k]["nodes"])):
         s = shapes[gk]
-        today, model_today, ideal = len(groups[gk]["nodes"]), simulate(gk, {}), ideal_all[gk]
+        today, ideal = len(groups[gk]["nodes"]), ideal_all[gk]
+        # Calibration uses the cluster's real rules only (no blast-radius cap, today's zones).
+        model_today = pack(items_after(gk, {}), *s["cap"], per_node_max({}, 1.0),
+                           sorted({zone_of[n] for n in groups[gk]["nodes"]}) if a.zones != "off" else [])[0]
+        capped_today = simulate(gk, {})
         real = at_fill(ideal, today)
         node_prices = [node_price(n) for n in groups[gk]["nodes"]]
         if s["usd_h"] is None or None in node_prices:
@@ -288,7 +334,10 @@ def main():
         print(f"| {gk[0]}, {gk[1]}, {gk[2]} | {s['mtype']} | {today} | {model_today} | {ideal} | {real} | {cost[0]} | {cost[1]} |")
         if model_today != today:
             print(f"\nCALIBRATION {gk[0]}: model gives {model_today} nodes for today's state, cluster has {today}. "
-                  "Explain the gap (mixed machine types, pending pods, scale-down lag, blast-radius cap) before trusting the after.\n")
+                  "Explain the gap (mixed machine types, pending pods, scale-down lag) before trusting the after.\n")
+        if capped_today > model_today:
+            print(f"\nBLAST RADIUS {gk[0]}: today's state needs {capped_today - model_today} more node(s) to respect "
+                  f"--max-share {a.max_share} (and the zones simulated): part of the after is the cost of that rule.\n")
     print(f"\nList price, USD/month: today {tot[0]:,.0f}, after {tot[1]:,.0f} to {tot[2]:,.0f} "
           f"(saving {tot[0] - tot[1]:,.0f} to {tot[0] - tot[2]:,.0f}; fill {a.fill} to ideal packing).")
 
@@ -319,8 +368,8 @@ def main():
     if not extra_shapes:
         return
     print(f"\n## Machine types, after all changes (blast radius {a.max_share:.0%} per node)\n")
-    print("| Group | Machine | Nodes, ideal | Nodes, at fill | USD/month (fill to ideal) | Worst share of one workload on a node | One node lost = share of the group |")
-    print("|---|---|---|---|---|---|---|")
+    print("| Group | Machine | Nodes, ideal | Nodes, at fill | USD/month (fill to ideal) | Worst share of one workload on a node | Worst share of one workload in a zone | One node lost = share of the group |")
+    print("|---|---|---|---|---|---|---|---|")
     for gk in sorted(shapes, key=lambda k: -len(groups[k]["nodes"])):
         spot = gk[1] == "spot"
         today = len(groups[gk]["nodes"])
@@ -337,14 +386,14 @@ def main():
             else:
                 print(f"| {gk[0]} | {mtype} | no spec in prices.json | | | |")
                 continue
-            n, worst = pack(items_after(gk, changes), *cap, per_node_max(changes))
+            n, worst, worst_zone = pack(items_after(gk, changes), *cap, per_node_max(changes), zones)
             if n == math.inf:
                 print(f"| {gk[0]} | {mtype} | a pod does not fit | | | |")
                 continue
             real = math.ceil(n / a.fill) if a.fill < 1 else n
             usd_h = spec.get("usd_h")
             cost = "n/a" if usd_h is None else f"{real * usd_h * HOURS_PER_MONTH:,.0f} to {n * usd_h * HOURS_PER_MONTH:,.0f}"
-            print(f"| {gk[0]}, {gk[1]}, {gk[2]} | {mtype} | {n} | {real} | {cost} | {worst:.0%} | {1 / n:.0%} |")
+            print(f"| {gk[0]}, {gk[1]}, {gk[2]} | {mtype} | {n} | {real} | {cost} | {worst:.0%} | {worst_zone:.0%} | {1 / n:.0%} |")
 
 
 if __name__ == "__main__":

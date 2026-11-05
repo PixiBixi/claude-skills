@@ -80,12 +80,14 @@ kubectl --context <ctx> get pods -A -o json > "$S/pods.json"
 SHAPES=c4d-highmem-2,c4d-highmem-8,c4d-standard-8   # candidates: same arch as the group, allowed by its compute class
 python3 scripts/fetch_prices.py "$S/nodes.json" --shapes "$SHAPES" > "$S/prices.json"   # GKE only, see its docstring for the format
 python3 scripts/node_impact.py --nodes "$S/nodes.json" --pods "$S/pods.json" \
-  --changes "$S/changes.json" --prices "$S/prices.json" --fill 0.75 --max-share 0.25 --shapes "$SHAPES"
+  --changes "$S/changes.json" --prices "$S/prices.json" --fill 0.75 --max-share 0.25 --zones auto --shapes "$SHAPES"
 ```
 
 **Machine types.** `--shapes` repacks each group after all changes into other machine types of the same arch. Pick candidates from the workload profile: memory-bound pods want a high GiB/vCPU ratio, a pod bigger than half a node wastes the rest. A cheaper shape only counts if the compute class (or node pool) can provision it: changing its priorities is a separate, platform-wide change. Moving to arm64 needs every image of the group to be multi-arch.
 
-**Blast radius.** `--max-share` (default 0.25) caps the share of one workload's replicas on a single node, at least 1 pod, and a required hostname anti-affinity means 1. Never raise it to make bigger nodes win: a few big nodes holding every replica of an app is a single point of failure, whatever it saves. Read two columns: the worst share of one workload on a node, and the share of the group one node loss takes. Zones are not modeled: a workload with a zonal `topologySpreadConstraints` needs at least one node per zone.
+**Blast radius.** `--max-share` (default 0.25) caps the share of one workload's replicas on a single node, at least 1 pod, and a required hostname anti-affinity means 1. Never raise it to make bigger nodes win: a few big nodes holding every replica of an app is a single point of failure, whatever it saves. Read three columns: the worst share of one workload on a node, in a zone, and the share of the group one node loss takes. Calibration ignores the cap; a `BLAST RADIUS` line says how many nodes today's state lacks to respect it, which the after includes.
+
+**Zones.** `--zones auto` (default) spreads each workload evenly over the zones of today's nodes, as the default zone spread does, keeps a pod with a PVC in its zone (zonal PV), and packs each zone apart: small workloads then cost one node per zone. A zone share of 100% means the group lives in one zone, so a zone outage takes the whole workload: report it. `--zones a,b,c` simulates other node locations; adding zones costs nodes plus inter-zone egress, which the simulator does not price.
 
 `changes.json` is keyed `<namespace>/<owner>` (Deployment name, StatefulSet name): `{"ns/app": {"cpu": "250m", "memory": "2Gi", "replicas": 10, "spread": "soft"}}`.
 
@@ -102,7 +104,7 @@ The answer is, in this order:
 1. One line: environment, window (start date and why), pod- or container-level.
 2. The workload table from `node_impact.py`, with the measured p95/p99/peak added per row: replicas, CPU req/limit, memory req/limit, before → after, and the nodes each change saves alone.
 3. The node table per group: today, after (fill to ideal), machine type, list price per month today and after.
-4. The machine-type table: nodes, USD/month, worst share of one workload per node, share of the group lost with one node. Recommend another shape only if it is cheaper and keeps both blast-radius columns at or below the current shape's.
+4. The machine-type table: nodes, USD/month, worst share of one workload per node and per zone, share of the group lost with one node. Recommend another shape only if it is cheaper and keeps both blast-radius columns at or below the current shape's.
 5. The gain per change (one MR each), from the "Gain per change" table: nodes and USD/month each MR adds on top of the previous ones, structural changes first, so the rows sum to the total. A 1-node row is within bin-packing noise: say so.
 6. The total saving in USD/month (list price), and the changes rejected for zero node gain.
 
