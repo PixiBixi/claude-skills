@@ -34,7 +34,7 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 7. **Build + vérifier** : `properdocs build --strict` préfixé du `DYLD_FALLBACK_LIBRARY_PATH` (Gotcha 4), puis relint markdown (Gotchas 2, 3 et 5). Contrôler que le SVG est copié et la balise `<img>` résolue.
 8. **Vérifier l'exactitude** - invoquer le skill `wiki-fact-check`. L'étape 7 prouve que l'article s'affiche, pas qu'il dit vrai. Sur un article neuf ou une réécriture de fond, c'est non négociable. Le rapport passe par l'auteur avant correction.
 9. **Montrer le diff à l'auteur** après toute passe qui touche à la prose (wording, corrections du fact-check) : `python3 -I scripts/wiki_compare.py` depuis le repo (en arrière-plan, le serveur de dev doit tourner) ouvre la page live et la page locale côte à côte, scroll lié et blocs modifiés surlignés. On attend sa relecture avant de committer.
-10. **Committer par scope** (Conventional Commits, un commit par portée), rebase sur `origin/master`, push.
+10. **Committer par scope** (Conventional Commits, un commit par portée), rebase sur `origin/master`, push. Avant le commit, `git status -sb` : le clone sert aussi aux branches de travail de l'auteur, si la branche n'est pas `master`, on s'arrête et on lui dit. Un fichier qui porte aussi ses modifications en cours ne se stage pas en entier : on ne passe que nos hunks (`git diff` filtré, puis `git apply --cached`).
 11. **Watcher la CI**, seulement pour un article neuf ou sur demande : `gh run watch <id> --repo PixiBixi/pixibixi.github.io --exit-status`, fini quand `lint` **et** `deploy` sont verts. Petite mise à jour d'un article existant : lint + build strict en local (étape 7), push, donner le hash du commit, pas de watch.
 
 ## Conventions MkDocs Material
