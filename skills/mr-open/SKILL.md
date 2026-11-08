@@ -27,6 +27,7 @@ git checkout -b fix/store-memory-cap "origin/$TARGET"
 ## 2. Commits
 
 - One commit per scope (`fix(tflint):`, `feat(module):`, `chore(live):`): two scopes in the diff means two commits, staged by path, never `git add -A`.
+- Before the first push, fold fix-up commits from review rounds into their scope: the MR carries one commit per scope, not the work history.
 - Conventional Commits, English, ticket key in the subject or body when there is one. The body says why, wrapped at 72.
 - README updated in the same change when a flag, feature or behavior changed.
 - Every commit signed: `git log --format="%h %G? %s" "origin/$TARGET..HEAD"` shows `G` on each line. Repair unsigned ones with `git rebase --exec "git commit --amend --no-edit -S --quiet" "origin/$TARGET"`, never `reset --hard`.
