@@ -1,7 +1,7 @@
 ---
 name: k8s-rightsizing
 description: >-
-  Use when sizing CPU/memory requests, limits or replicas of a Kubernetes workload from its real usage, and before any edit of a `resources:` block in Helm values: "on peut réduire cette RAM ?", "combien consomme <workload>", "il a déjà été OOMKilled ?", "combien de nodes on gagne ?", "ça coûte combien ?", a FinOps cut, a cluster with many idle nodes. Not for CI runners or a live OOM incident.
+  Use when sizing CPU/memory requests, limits or replicas of a Kubernetes workload from its real usage, and before any edit of a `resources:` block in Helm values: "on peut réduire cette RAM ?", "combien consomme <workload>", "il a déjà été OOMKilled ?", "combien de nodes on gagne ?", "ça coûte combien ?", a FinOps cut, a cluster with many idle nodes, or sizing a new workload before its first traffic. Not for CI runners or a live OOM incident.
 ---
 
 # K8s rightsizing
@@ -41,6 +41,8 @@ Always filter on cluster and namespace (and container on raw series): an unfilte
 
 Live spec for comparison: `kubectl klens reqlim --context <ctx> -n <ns> --by-owner`.
 
+**mmap-heavy workloads** (Thanos store-gateway, Prometheus, Tempo, anything mmapping index or block files): the working set and any "memory usage" recording rule count the page cache of the mapped files, which the kernel reclaims under pressure. Size on the container RSS (`container_memory_rss`), and put the metric and its definition on the first line of the analysis. Agree on the metric with the user before opening any MR: three sizing MRs were once closed because they were built on the working set.
+
 ## 3. Recommend
 
 | Value | Default rule (state the factors in the answer; a team standard overrides them) |
@@ -52,6 +54,7 @@ Live spec for comparison: `kubectl klens reqlim --context <ctx> -n <ns> --by-own
 | CPU limit | follow the repo (unset stays unset); if set, at least 2 x the request |
 | Any OOMKill or memory restart in the window | no memory cut, report it first |
 | Under 7 days of data, a recent rollout, or a known peak outside the window | say so, widen the window, or do not recommend |
+| New workload, no traffic yet | no factor borrowed from another app's usage: size from a load test or the old platform's measured peak, or ship the chart default and resize after 7 days of real traffic |
 | HPA on `Utilization` for that resource | the target is a % of the request: lowering the request scales the workload out, recompute the target |
 
 Also check the replicas and the spread rules: a required `podAntiAffinity` on `kubernetes.io/hostname` makes the node count >= replicas, whatever the requests. It is often the biggest lever and no requests cut can beat it.
