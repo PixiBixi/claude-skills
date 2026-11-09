@@ -18,6 +18,8 @@ description: >-
 
 New branch, always from the freshly fetched remote: a local target branch may carry unpushed commits that would leak into the MR.
 
+Several related changes: open independent MRs, each branched from the target. Stack one on another only when it cannot build alone; then state the merge order in both descriptions and retarget the child to the target branch before the parent is merged, or merging the child lands it in the parent's branch.
+
 ```bash
 TARGET=$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's|^origin/||')
 git fetch origin "$TARGET"
