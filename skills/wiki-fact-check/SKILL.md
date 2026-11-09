@@ -94,6 +94,12 @@ An agent asked to "verify this article" confirms the article. The posture that f
 
 A claim that could not be sourced is not validated. It goes out as IMPRECISE, noting the source is missing, and the author decides.
 
+**Run the snippets.** A command, config or script block that can run in a throwaway container (OrbStack, `docker run --rm`) is run there, not only read against the source: a re-read found 4 bugs this way that source reading had missed (an exim taint, a `-Werror` build, a VCL that does not compile, a `find -delete` ordering).
+
+## Batch mode
+
+More than 3 articles to check: do not ask for approval article by article. Run the passes in parallel lots of 6 (one Sonnet subagent per article, under the concurrent subagent limit), collect every report into one table, get the author's decisions on that table in one round, then apply and commit per article. Keep a reference copy of each article before rewriting it.
+
 ## Quick reference
 
 | Question | Where the answer lives |
