@@ -16,7 +16,8 @@ Any `warnings` returned by Thanos are always printed, never swallowed.
 On a plain Prometheus datasource neither parameter is sent and `stores` refuses.
 
 Transport: the Grafana datasource proxy through `gcx api`, so no tailnet is
-needed. Context: --context, else THQ_CONTEXT, else gcx's current-context.
+needed. Context: --context, else THQ_CONTEXT, else GCX_CONTEXT, else gcx's
+current-context.
 Datasource: --ds, else THQ_DS, else CONTEXT_DEFAULT_DS, else the context's
 `datasources.prometheus` in gcx config. --ds takes a uid, an ALIASES key or a
 datasource name. THQ_DIRECT=1 is the degraded mode: plain curl to THANOS_URL
@@ -35,7 +36,7 @@ import time
 import urllib.parse
 
 PARTIAL = ["false"]          # set once from --partial; api() applies it to every call
-CONTEXT = os.environ.get("THQ_CONTEXT")   # None: gcx current-context, resolved in main()
+CONTEXT = os.environ.get("THQ_CONTEXT") or os.environ.get("GCX_CONTEXT")  # None: current-context, resolved in main()
 DS = os.environ.get("THQ_DS")             # None: per-context default, resolved in main()
 
 
@@ -337,7 +338,8 @@ def main():
     common.add_argument("--timeout", type=int, help="per-request timeout seconds (default 180)")
     common.add_argument("--raw", action="store_true", help="dump raw JSON instead")
     common.add_argument("-c", "--context", metavar="CTX",
-                        help="gcx context (default: THQ_CONTEXT, else gcx current-context)")
+                        help="gcx context (default: THQ_CONTEXT, else GCX_CONTEXT, "
+                             "else gcx current-context)")
     common.add_argument("--ds", metavar="UID|ALIAS|NAME",
                         help=f"Prometheus-compatible datasource; aliases: {', '.join(ALIASES)} "
                              "(default: THQ_DS, else the context's default)")
