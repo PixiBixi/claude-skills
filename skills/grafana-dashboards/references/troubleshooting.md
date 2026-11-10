@@ -4,6 +4,7 @@ Find the symptom, apply the fix; the full reasoning is in `panels.md` and `promq
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| v2 dashboard no longer loads: "Cannot read properties of null (reading 'map')" | a pushed panel omitted `transformations`, the server stored `null` | restore the previous version, then always send `transformations: []` on every panel |
 | Panel empty on the global store, OK on per-cluster | metric filtered out of the global | use a forwarded recording rule (or ship the metric) |
 | Query pods OOMKilled on dashboard load | fan-out x stepless subquery x no cluster filter | cluster filter + `[24h:5m]` / range-vector RR |
 | Table has 10+ stray columns | raw RR in `format: table` leaks external labels | wrap in `max by (namespace, pod) (...)` |

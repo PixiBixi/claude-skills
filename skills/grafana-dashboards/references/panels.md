@@ -2,6 +2,9 @@
 
 Template variables, tables, fleets and healthy states. Query-side traps are in `promql.md`.
 
+## Layout without hardcoded x/y (v2, Grafana 13)
+A row's `layout` can be a nested `RowsLayout` whose sub-rows each hold an `AutoGridLayout` (`maxColumnCount`, `columnWidthMode`, `rowHeightMode`, `fitContent` on table items so they size to their rows). `hideHeader: true` gives a header-less sub-row, `collapse: true` folds a row by default. There are no vertical tabs: `TabsLayoutSpec` only has `tabs`. `?viewPanel=` takes the numeric panel id, `panel-54` answers "Panel not found" (read in `findVizPanel.ts`, not yet tested in a browser).
+
 ## Template variables (fast)
 Use `query_result(group by (<label>) (<low-cardinality metric>))` plus a `regex`, NOT `label_values()` (which hits the slow `/series` API on Thanos). Set `refresh: 1` (on load), variable `query.qryType: 3`.
 ```
