@@ -100,6 +100,14 @@ A claim that could not be sourced is not validated. It goes out as IMPRECISE, no
 
 More than 3 articles to check: do not ask for approval article by article. Run the passes in parallel lots of 6 (one Sonnet subagent per article, under the concurrent subagent limit), collect every report into one table, get the author's decisions on that table in one round, then apply and commit per article. Keep a reference copy of each article before rewriting it.
 
+## Re-check and the ledger
+
+Every checked article has a ledger entry in the wiki repo, `factcheck/<path under docs>.md`: front matter `article`, `checked`, `commit` (the fix commit), `sources` (`repo`, `path`, `lines`, `ref`, `commit` in `~/Documents/work/src`), `unpinned`; the body is the last report.
+
+Before re-checking, run `uv run scripts/factcheck_stale.py [docs/...]` (`--fetch` refreshes the source clones first). It lists the articles whose text changed since `commit`, and the pinned sources that gained upstream commits after `checked`. Re-check only those, and inside them only the changed lines, the claims citing a moved source, and the `unpinned` claims. An article without an entry gets a full pass.
+
+After the fix commit, rewrite the entry: new `checked` and `commit`, each source pinned to the full commit read, the new report as body. Write sources as `path:lines @ ref` in the report so the pins can be extracted. Lint the entry like any `.md`.
+
 ## Quick reference
 
 | Question | Where the answer lives |
