@@ -34,3 +34,22 @@ jobs:
           prek-version: '0.5.10'
           # The action skips verification for versions missing from its bundled checksums: bump with prek-version.
           sha256: '5c832a9ccd0855b7c054320d8921d90165a37459d3ac175923bdf121ff1aa9b1'
+
+  plugin-validate:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      # No secret needed: validate runs without login, the empty config dir keeps it reproducible.
+      - name: claude plugin validate
+        run: |
+          npm install -g --no-audit --no-fund @anthropic-ai/claude-code@2.1.322
+          CLAUDE_CONFIG_DIR="$(mktemp -d)" claude plugin validate .
