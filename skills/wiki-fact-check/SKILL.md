@@ -1,127 +1,66 @@
 ---
 name: wiki-fact-check
 description: >-
-  Use before committing a new or rewritten PixiBixi wiki article, or when asked to verify an existing one: "vérifie l'article", "fact-check", "est-ce que c'est juste", "relis avant commit". Not for writing or rewording (pixibixi-wiki-article).
+  Use before committing a new or rewritten PixiBixi wiki article, or when asked to verify an existing one: "vérifie l'article", "fact-check", "est-ce que c'est juste", "relis avant commit". Covers claim extraction, checking against upstream source code, a freshness pass since the article's date, running snippets, batch checks and re-checks from the factcheck ledger. Not for writing or rewording (pixibixi-wiki-article).
 ---
 
 # Fact-checking a wiki article
 
-## Overview
+The build and markdownlint prove an article renders, nothing proves it is true. Across 9 AI-written articles, 49 claims were false, a third of them default values or borrowed numbers: syntax and flag names were almost always right, what breaks is whatever can be guessed plausibly.
 
-The build and markdownlint prove an article **renders**. Nothing proves it is **true**. This skill covers that gap.
+The `yaml` and `json` fences are already checked by the wiki's `check-code-blocks` pre-commit hook: do not re-verify them by hand.
 
-Measured across 9 AI-written articles: 49 false claims, 17 of them default values or numbers borrowed from upstream. Syntax and flag names were almost always right. What breaks is whatever can be guessed plausibly.
+## Mode
 
-**REQUIRED BACKGROUND:** this skill checks prose. The `yaml` and `json` fences are already covered by the repo's `check-code-blocks` pre-commit hook, so do not re-verify them by hand.
+- One article, never checked: the workflow below.
+- Article with a `factcheck/` ledger entry: read `references/ledger.md` first, it narrows the pass to what moved.
+- More than 3 articles: read `references/batch.md`.
 
-## What a verification pass produces
+## Workflow
 
-A report, never an edit to the article. The fix comes afterwards, once the author agrees.
+Copy this checklist and tick it as you go:
 
-Every finding carries **4 required fields**:
+```text
+- [ ] 1. Date the article
+- [ ] 2. Extract every claim
+- [ ] 3. Verify each claim against the source
+- [ ] 4. Freshness pass since the date
+- [ ] 5. Run the snippets
+- [ ] 6. Write the report
+```
+
+1. **Date.** Front matter, else `git log --diff-filter=A --format=%ad -- <file>`.
+2. **Extract** before verifying: checking while reading misses whatever does not catch the eye. One line per claim, in 6 families:
+   1. Default values of a flag, API field, config option
+   2. Numbers: thresholds, ratios, gains, percentages, sizes
+   3. Names of flags, metrics, YAML fields, commands, and which component owns them
+   4. Behaviours: what a mechanism does, in what order, with what side effect
+   5. Versions: since when, until when, GA or beta, deprecated or removed
+   6. Return codes and quoted error messages
+3. **Verify** each line by trying to break it: hunt the counter-example, the missing condition, the version where it stopped being true. An agent asked to "verify" otherwise confirms. For families 1, 3 and 4, read the source code, not the doc page: `references/source-checks.md` says where each answer lives and which extra checks to run (version, own config, PR titles, privileged recipes, present-tense bugs).
+4. **Freshness.** Fact-checking against the source misses what shipped after the article was written (5 of about 25 corrections on one CI article). For each tool, platform and API cited, read what changed since the date: releases (`gh api repos/<o>/<r>/releases --jq '.[] | select(.published_at > "<date>") | .tag_name'` or `git tag --sort=-creatordate` in the local clone), CHANGELOG, and for GitHub its changelog and deprecation notices. Skim titles, open only what touches a claim. Hunt the time-bound words: "en preview", "bientôt", "prévu", "annoncé", "aujourd'hui", "par défaut", a quoted error message, a future date. CI and platform articles age fastest: run this step on every re-read of those.
+5. **Run the snippets.** A command, config or script that can run in a throwaway container (`docker run --rm`, OrbStack) is run, not only read: one re-read found 4 bugs this way that source reading had missed.
+6. **Report**, in the format below.
+
+## Report
+
+A report, never an edit to the article: the fix comes once the author agrees. One row per finding, all 4 fields required:
 
 | Field | Content |
 |---|---|
-| `Severity` | ERROR, OUTDATED or IMPRECISE (see the rubric) |
+| `Severity` | ERROR, OUTDATED or IMPRECISE |
 | `Line` | `docs/<section>/<article>.md:<n>` |
 | `Article` | short quote of what the article says |
-| `Actual` | the correct fact, followed by its source |
+| `Actual` | the correct fact, then a verbatim quote of the source with its URL, or `path:lines @ ref` in the upstream repo |
 
-The `Actual` field carries a **verbatim quote** of the source plus its URL, or a `file:line` in the upstream repository. A paraphrase presented inside quotation marks is a fabricated citation: copy the exact words, or drop the quotation marks.
+A paraphrase inside quotation marks is a fabricated citation: copy the exact words or drop the quotes. Close with a tally: claims checked, ERROR, OUTDATED, IMPRECISE.
 
-Close with a tally: claims checked, ERROR, OUTDATED, IMPRECISE.
+Severity is judged on what the reader does, not on how far the sentence is from the truth. This is where a check degrades into a rubber stamp:
 
-## The severity rubric
-
-This is where a verification degrades into a rubber stamp. The test is **what the reader does**, not how far the sentence is from the truth:
-
-- **ERROR**: a reader who acts on the sentence does the wrong thing, or takes away a guarantee that does not exist.
-- **OUTDATED**: true in an earlier version, false in the current one.
-- **IMPRECISE**: the reader still does the right thing, only the wording is loose.
-
-A claim that holds only under an unstated condition is an **ERROR**, not an imprecision. "`maxSkew: 1` guarantees one pod per node" is false as soon as replicas outnumber nodes: the reader takes away a drain guarantee they do not have.
-
-## Extract before verifying
-
-Verifying while reading misses whatever does not catch the eye. List first, check second.
-
-Sweep the article and pull out **every** claim in these 6 families, each becoming one line to check:
-
-1. **Default values** of a flag, an API field, a config option
-2. **Numbers**: thresholds, ratios, performance gains, percentages, sizes
-3. **Names** of flags, metrics, YAML fields, commands, and which component owns them
-4. **Behaviours**: what a mechanism does, in what order, with what side effect
-5. **Versions**: since when, until when, GA or beta, deprecated or removed
-6. **Return codes** and quoted error messages
-
-Families 1 and 2 pay best: together they accounted for a third of the observed errors.
-
-## Source beats documentation
-
-Upstream docs lag or lie more often than expected, and precisely on the subtle points.
-
-Two cases hit on the same day:
-
-- Thanos `query-frontend.md` still claims only range queries go through the frontend. `roundtrip.go` has defined a `newInstantQueryTripperware` since 0.35.
-- An agent reported `thanos_bucket_store_series_gate_duration_seconds`. The real name is `..._gate_queries_duration_seconds`, readable only in `pkg/gate/gate.go`.
-
-So for any claim in families 1, 3 and 4: **go read the source**, not just the doc page. A default value lives in the flag declaration, a metric name in its definition, a behaviour in the function implementing it.
-
-When docs and code disagree, code wins and the report flags the contradiction.
-
-More checks the source makes cheap:
-
-- **Version.** A behaviour can be true for the version deployed and false for the reader's. Find when it changed (`git log -S` on the function, then `git tag --contains`) and flag a claim that does not date itself. Thanos receive RF=2 needed both replicas to ack until v0.37 (PR #7669), then a quorum of 1.
-- **Our own config.** A passage describing the author's setup (layers, flags, ApplicationSet shape) is checked against the current repo, not memory: the Thanos ApplicationSet had been rewritten since the article was drafted. Check the version actually running too (`kubectl get pods -o jsonpath` on the image), since a chart default can pin an older release than the repo suggests.
-- **A fix named in a PR title.** "Fixed in vX" is verified by reading what the fix computes, not what it is called. Thanos `ObjectStorageConfigHash` (PR #6880) hashes the caching-bucket config plus its file path, not the object-store config, so 2 stacks sharing one backend still collide in v0.42.
-- **A Kubernetes recipe that runs privileged.** Ask which namespace it changes and whether a native path exists. A `sysctl -w` initContainer in a `hostNetwork` pod rewrites the node for every host-network process, since the kubelet rejects `net.*` sysctls there (`pkg/kubelet/sysctl/allowlist.go`). In a pod with its own netns, `securityContext.sysctls` does it unprivileged, safe or unsafe per `safe_sysctls.go`, and Pod Security `baseline` admits only the safe ones.
-- **A third-party bug described in the present tense.** Search upstream for a later fix (`git log --grep`, `git tag --contains`) and compare with the deployed version: Dragonfly emits its zero-valued eviction counters since v2.0.0 (PR #8052), while prod ran v1.37.
-
-## Freshness pass
-
-A claim true on the day the article was written can be false today. On the GitHub hardening article, 5 of about 25 corrections were changes that shipped in the 6 weeks after writing: a runner image going GA, a preview feature, a reworded validator message, an endpoint sunset, a renamed API host. Fact-checking against the source alone does not catch them unless the check starts from the article's date.
-
-1. Take the article's date: the front matter, else `git log --diff-filter=A --format=%ad -- <file>`.
-2. List every tool, platform and API the article cites.
-3. For each one, read what changed since that date: the releases (`gh api repos/<o>/<r>/releases --jq '.[] | select(.published_at > "<date>") | .tag_name'`, or `git tag --sort=-creatordate` in the local clone), the CHANGELOG, and for GitHub itself the [changelog](https://github.blog/changelog/) and deprecation notices. Skim titles, open only what touches a claim.
-4. Hunt the time-bound words: "en preview", "bientôt", "prévu", "annoncé", "aujourd'hui", "par défaut", a quoted error message, a date in the future.
-
-A changed fact goes in the report like any other, tagged OUTDATED with the date it changed, so the author sees it is not a writing mistake. CI and platform articles age fastest: run the pass on every re-read of those, not only on a new article.
-
-## Try to break it, not to confirm it
-
-An agent asked to "verify this article" confirms the article. The posture that finds anything is the opposite: for each claim, actively hunt the counter-example, the missing condition, the version where it stopped being true.
-
-A claim that could not be sourced is not validated. It goes out as IMPRECISE, noting the source is missing, and the author decides.
-
-**Run the snippets.** A command, config or script block that can run in a throwaway container (OrbStack, `docker run --rm`) is run there, not only read against the source: a re-read found 4 bugs this way that source reading had missed (an exim taint, a `-Werror` build, a VCL that does not compile, a `find -delete` ordering).
-
-## Batch mode
-
-More than 3 articles to check: do not ask for approval article by article. Run the passes in parallel lots of 6 (one Sonnet subagent per article, under the concurrent subagent limit), collect every report into one table, get the author's decisions on that table in one round, then apply and commit per article. Keep a reference copy of each article before rewriting it.
-
-## Re-check and the ledger
-
-Every checked article has a ledger entry in the wiki repo, `factcheck/<path under docs>.md`: front matter `article`, `checked`, `commit` (the fix commit), `sources` (`repo`, `path`, `lines`, `ref`, `commit` in `~/Documents/work/src`), `unpinned`; the body is the last report.
-
-Before re-checking, run `uv run scripts/factcheck_stale.py [docs/...]` (`--fetch` refreshes the source clones first). It lists the articles whose text changed since `commit`, and the pinned sources that gained upstream commits after `checked`. Re-check only those, and inside them only the changed lines, the claims citing a moved source, and the `unpinned` claims. An article without an entry gets a full pass.
-
-After the fix commit, rewrite the entry: new `checked` and `commit`, each source pinned to the full commit read, the new report as body. Write sources as `path:lines @ ref` in the report so the pins can be extracted. Lint the entry like any `.md`.
-
-## Quick reference
-
-| Question | Where the answer lives |
-|---|---|
-| Default value of a flag | The flag declaration under `cmd/`, or generated help. Never a blog post |
-| Exact name of a metric | Its definition (`promauto.New...`), including any prefix added by a `WrapRegistererWithPrefix` |
-| A Kubernetes API field and its default | `kubernetes/api`, `core/v1/types.go`, the field comment |
-| GA or beta | `pkg/features/kube_features.go` for Kubernetes, the CHANGELOG otherwise |
-| A borrowed performance number | The originating PR or benchmark. An unsourced round number is almost always wrong |
-| A CLI behaviour | The subcommand's code first, the docs second. A tool's output: run it when that is cheap and paste what it prints (an agent rebuilt the `renovate-config-validator` message from `validation.ts` and quoted a warning, while the run prints an error first) |
-
+- **ERROR**: a reader who acts on the sentence does the wrong thing, or takes away a guarantee that does not exist. A claim true only under an unstated condition is an ERROR ("`maxSkew: 1` guarantees one pod per node" fails once replicas outnumber nodes).
+- **OUTDATED**: true in an earlier version, false in the current one. Give the date it changed, so the author sees it is not a writing mistake.
+- **IMPRECISE**: the reader still does the right thing, only the wording is loose. A claim that could not be sourced lands here too, marked "source missing": it is not validated.
 
 ## Cost
 
-A pass runs about 90k to 120k tokens per article.
-
-Use **Sonnet**: checking that a flag exists and reading its default is pattern work. Reserve **Opus** for articles whose argument is a numeric chain, where the point is to notice that a calculation does not hold.
+About 90k to 120k tokens per article. Use Sonnet: checking that a flag exists and reading its default is pattern work. Reserve Opus for articles whose argument is a numeric chain, where the point is to notice that a calculation does not hold.
