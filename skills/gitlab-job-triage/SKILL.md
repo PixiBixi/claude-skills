@@ -1,7 +1,7 @@
 ---
 name: gitlab-job-triage
 description: >-
-  Use when the user pastes a GitLab job or pipeline URL (.../-/jobs/<id>, .../-/pipelines/<id>), alone or with "pourquoi ça a fail ?", "le job est rouge", "lis le plan il est chelou", "check moi le plan" (Terraform/Terragrunt plan). Not for a rollout after a merge (post-merge-verify).
+  Use when the user pastes a GitLab job or pipeline URL (.../-/jobs/{id}, .../-/pipelines/{id}), alone or with "pourquoi ça a fail ?", "le job est rouge", "lis le plan il est chelou", "check moi le plan" (Terraform/Terragrunt plan). Not for a rollout after a merge (post-merge-verify).
 ---
 
 # GitLab job triage
