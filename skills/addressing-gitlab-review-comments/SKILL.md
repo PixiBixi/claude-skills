@@ -1,7 +1,7 @@
 ---
 name: addressing-gitlab-review-comments
 description: >-
-  Use when a reviewer left comments on a GitLab MR to address: "check la review de <name>", "réponds à la review", an MR URL plus "review" or "commentaire". Not for reviewing someone else's MR (platform-mr-review).
+  Use when a reviewer left comments on a GitLab MR to address: "check la review de {name}", "réponds à la review", an MR URL plus "review" or "commentaire". Not for reviewing someone else's MR (platform-mr-review).
 ---
 
 # Addressing GitLab MR Review Comments

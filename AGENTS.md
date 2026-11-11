@@ -26,6 +26,7 @@ A SKILL.md with a `source:` frontmatter field mirrors an upstream file (`conflue
 - The description is the only thing that decides whether the skill loads. Shape: `Use when <situation>`, then the phrases actually typed (`Triggers - "fais la MR", "ouvre la MR"`), an optional `Covers ...` scope sentence, then `Not for <near miss> (<sibling skill>)`.
 - Keep trigger phrases in the language they are typed in, French or mixed, even though the body is English. Translating them breaks discovery.
 - No workflow steps in the description: a description that summarises the process gets followed instead of the body.
+- claude.ai drops a skill whose frontmatter it cannot read: no `<…>` in a description (write placeholders as `{name}`), at most 1024 characters, no block scalar on a key other than `description`. `scripts/check-frontmatter.py` enforces it in prek.
 - Never write a colon followed by a space in an unquoted YAML description, it breaks the parse. Use `Triggers -`, a comma, parentheses, or a folded `description: >`.
 - A skill that failed to trigger gets its description fixed here and committed, never patched with a memory. Add the phrasing that was actually used: real prompts beat imagined ones.
 

@@ -1,7 +1,7 @@
 ---
 name: tf-module-release
 description: >-
-  Use right after a Terraform module MR is merged, to tag the new version and bump its callers: "fais le tag & bump module.hcl", "<n> est merge, tag". Not for Helm chart releases.
+  Use right after a Terraform module MR is merged, to tag the new version and bump its callers: "fais le tag & bump module.hcl", "{n} est merge, tag". Not for Helm chart releases.
 ---
 
 # Terraform module release

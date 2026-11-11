@@ -14,8 +14,9 @@ update-skills: ## Fetch latest SKILL.md from upstream sources (one commit per up
 check: ## Show skills diffs without modifying files (dry-run)
 	@python3 $(SCRIPT) --check
 
-validate: ## Validate the plugin and marketplace manifests
+validate: ## Validate the plugin and marketplace manifests, and the SKILL.md frontmatter
 	@claude plugin validate $(ROOT_DIR)
+	@python3 $(ROOT_DIR)scripts/check-frontmatter.py
 
 check-anchors: ## Check the wiki URLs and anchors cited by the wiki plugin skills against the live site
 	@python3 $(ROOT_DIR)plugins/wiki/check-anchors.py
