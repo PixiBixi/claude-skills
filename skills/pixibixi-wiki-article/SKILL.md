@@ -46,6 +46,7 @@ Ce skill capture la procédure complète *et les pièges qui cassent la CI ou la
 - **Une liste dont chaque item porte un oui/non et sa raison devient un tableau** (`Opération | Couverte | Pourquoi`), comme 2 listes « ce qui passe » et « ce qui ne passe pas ».
 - **Les outils de l'auteur** : quand l'article montre une commande manuelle qu'un de ses projets couvre déjà (klens pour l'inspection read-only d'un cluster, par exemple), proposer de la remplacer par l'outil, lien vers le repo compris. Ses sites de référence (rules.jdelgado.fr pour les règles Prometheus) vont aussi dans « Voir aussi », avec un lien direct sur le fichier concerné.
 - **Un tableau et le bloc de code qui le suit gardent le même ordre** : si le tableau présente `low` puis `high`, la config et la prose qui suivent aussi, sinon le lecteur croit les sens inversés.
+- **Déploiement en GitOps** : un exemple qui déploie sur Kubernetes passe par Argo CD ou Flux (Kustomize, `configMapGenerator` pour un rollout sur changement de config). Un job CI qui fait `kubectl apply` ou `rollout restart` n'apparaît jamais, la CI s'arrête à la validation.
 - **Liens internes** : chemins relatifs vers le `.md` (`goreleaser.md`, `github/go-ci.md`) - MkDocs les résout.
 - **Images/SVG** : `![Alt](nom.svg)` avec le fichier dans le même dossier que l'article.
 

@@ -15,7 +15,7 @@ Le `CLAUDE.md` du projet porte le style de fond (ton, structure, tournures). Ce 
 - **Pas de virgule devant « et »**, ni devant « ou » et « ni ». C'est une faute, le réflexe vient de l'anglais où le comma before *and* est courant. On écrit « le cache et l'enveloppe mémoire », pas « le cache, et l'enveloppe mémoire ». Ça vaut aussi dans une énumération, où le français met la virgule entre les termes mais pas devant le dernier : « Ansible, Terraform et Makefile ». Ça vaut encore quand le « et » relie 2 propositions qui ont chacune leur sujet (« n'est la CVE de personne, et govulncheck n'a rien à en dire »). C'est le cas qui survit le plus souvent à une passe wording : 7 des 9 restes de go-ci étaient de ce type. Si la phrase a besoin d'une pause, on la coupe ou on prend « mais » quand le sens s'oppose. Attention au retour à la ligne, la faute se cache aussi à cheval sur 2 lignes, virgule en fin de ligne et `et` au début de la suivante, où un grep sur `, et` ne la voit pas.
 
     Une virgule qui **ferme une incise** juste avant le « et » est grammaticalement correcte (« le `main:` du build, qui vaut `""` tant qu'on ne l'a pas écrit, et ko passe cette chaîne vide »), mais l'auteur la refuse à la lecture comme les autres (« 3 caches, un par type de donnée, et ils… »). On ne la garde pas : on coupe la phrase ou on transforme l'incise en relative sans virgule. Un remplacement global ne la retire pas pour autant à l'aveugle, puisque retirer la seule virgule casse la phrase.
-- **Genre des acronymes et des composants** : il suit le nom-tête de l'expression développée, pas l'anglais. Une TSDB (*Database*), une API (*interface*), une VM (*machine*), une stack (*pile*), une store gateway (*passerelle*), une query (*requête*). Mais **un querier**, qui est le composant et pas la requête, un query frontend dont la tête est *frontend*, un compactor. Un nom de fichier prend le genre de *fichier* : un `renovate.json`, un `Dockerfile`. Accorder aussi les pronoms et adjectifs.
+- **Genre des acronymes et des composants** : il suit le nom-tête de l'expression développée, pas l'anglais. Une TSDB (*Database*), une API (*interface*), une VM (*machine*), une stack (*pile*), une store gateway (*passerelle*), une query (*requête*). Mais **un querier**, qui est le composant et pas la requête, un query frontend dont la tête est *frontend*, un compactor. Une probe (*sonde*), mais un prober, qui est l'instance qui les exécute. Un nom de fichier prend le genre de *fichier* : un `renovate.json`, un `Dockerfile`. Accorder aussi les pronoms et adjectifs.
 
     L'accord voyage plus loin que le déterminant collé au mot, et c'est là que la faute survit à la relecture. `attend tous les stacks`, `partagés par tous les stacks` et `les stacks annotés` sont faux au même titre que `un stack`, mais un grep sur `un stack` n'en voit aucun. Chercher aussi les quantifieurs (`tous`, `certains`, `plusieurs`), les participes détachés du nom et les textes alternatifs des schémas, que personne ne relit.
 - **Le vocabulaire du domaine, pas son équivalent français.** La règle n'est pas une liste de mots, c'est un critère : si le terme est celui qu'on lit dans les flags, les métriques, la doc amont ou les dashboards, il reste tel quel. Traduire oblige le lecteur à refaire la correspondance dans sa tête au moment où il cherche justement à retrouver un flag. `timerange` et pas « plage de temps » ni « tranche de temps », `replicas` et pas « réplicas », `at scale` et pas « à l'échelle », `évicté` et pas « évincé », pour le spot comme pour un cache, `rollback` et pas « revenir en arrière », `tuning` et `tuner` et pas « régler » quand on parle de l'acte d'optimiser (un « réglage » reste le mot pour une option précise), `lazy load` et `lazy download` et pas « lecture paresseuse » ni « téléchargement paresseux », même avec le flag sous les yeux. Les noms K8s et infra restent en anglais, sans accent.
@@ -77,6 +77,8 @@ Un `**Label**` posé en tête de bloc pour annoncer ce qui suit est un titre dé
 
 Le gras reste légitime à l'intérieur d'une phrase, ou en tête d'item de liste : là il insiste, il n'annonce pas une section.
 
+Il y est même attendu. Un item de liste qui ouvre sur un libellé suivi de `:` ou d'une question met ce libellé en gras (`- **Sampling** : ...`, `- **Le prober ou la cible ?** ...`), sur toute la liste et toutes les listes de ce type de l'article. Une phrase d'avertissement qui casse ce qui précède (« **Baisser ce plafond ne suffit pas** : ... ») ouvre son propre paragraphe, en gras jusqu'au deux-points.
+
 ### Un projet tiers en titre porte son lien
 
 Un titre qui nomme une librairie ou un outil tiers (`### Solution 1 - KimMachineGun/automemlimit`) pose le lien vers son repo sur le nom, dans le titre même : c'est là que le lecteur le cherche. Appliquer à tous les titres de l'article du même type, pas seulement à celui signalé.
@@ -96,6 +98,10 @@ L'erreur la plus fréquente, c'est de découper pour faire du rythme. Une phrase
 **Ne pas** viser un plafond de mots par phrase. Cette voix accepte 40 mots quand ils coulent :
 
 > Une store gateway qui sert tout le bucket doit être dimensionnée pour la requête la plus violente qu'on lui posera jamais, par exemple un dashboard avec un timerange de 6 mois qui va charger énormément de donnée en RAM sur tous les replicas.
+
+### Nommer le sujet
+
+Une phrase dit de quoi elle parle avec un nom complet, pas un adjectif ou une catégorie seule. « Pour DNS, la cible est... » devient « Pour une probe DNS, la cible est... », « Un dual-stack qui marche en IPv4 » devient « Un service dual-stack qui... ». Un terme introduit (prober, probe) garde le même sens de bout en bout : s'il désigne 2 choses proches, on le définit une fois en tête d'article.
 
 ### Un paragraphe, une idée
 
